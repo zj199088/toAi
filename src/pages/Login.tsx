@@ -6,37 +6,40 @@ import { Mail, Lock, User, MessageSquare } from 'lucide-react'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
-  const { signUp, signIn, signInWithWechat, error, isLoading } = useUserStore()
+  const { signUp, signIn, signInWithWechat, error, isLoading, user } = useUserStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [name, setName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false)
+
+  // 监听用户状态变化，一旦有用户就自动导航
+  React.useEffect(() => {
+    if (user && hasAttemptedLogin) {
+      navigate('/')
+    }
+  }, [user, hasAttemptedLogin, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting || isLoading) return
     setIsSubmitting(true)
+    setHasAttemptedLogin(true)
     
-    let success = false
     if (isRegistering) {
-      success = await signUp(email, password, name)
+      await signUp(email, password, name)
     } else {
-      success = await signIn(email, password)
+      await signIn(email, password)
     }
     
     setIsSubmitting(false)
-    // 只有在登录成功时才导航，添加延迟确保状态同步
-    if (success) {
-      setTimeout(() => {
-        navigate('/')
-      }, 150)
-    }
   }
 
   const handleWechatLogin = async () => {
     if (isSubmitting || isLoading) return
     setIsSubmitting(true)
+    setHasAttemptedLogin(true)
     
     // 模拟微信登录，实际项目中会跳转到微信授权页面
     const mockWechatInfo = {
@@ -44,13 +47,9 @@ const Login: React.FC = () => {
       nickname: '微信用户',
       avatarUrl: 'https://via.placeholder.com/150'
     }
-    const success = await signInWithWechat(mockWechatInfo)
+    await signInWithWechat(mockWechatInfo)
     
     setIsSubmitting(false)
-    // 只有在登录成功时才导航
-    if (success) {
-      navigate('/')
-    }
   }
 
   return (
