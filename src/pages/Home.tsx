@@ -8,7 +8,7 @@ import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Ti
 const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
   const { currentPlan, getPlans } = useFitnessPlanStore()
-  const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
+  const { records, isLoading, error, getRecords, totalCountLastYear, getTotalCountLastYear } = useWorkoutRecordStore()
   const [exerciseMap, setExerciseMap] = useState<Record<string, string>>({})
   const [loadingExercises, setLoadingExercises] = useState(true)
   const [loadingPlans, setLoadingPlans] = useState(true)
@@ -33,6 +33,12 @@ const Home: React.FC = () => {
       getRecords(currentPlan.id, 3)
     }
   }, [currentPlan, getRecords])
+
+  useEffect(() => {
+    if (user) {
+      getTotalCountLastYear()
+    }
+  }, [user, getTotalCountLastYear])
 
   useEffect(() => {
     // 获取所有锻炼动作，构建映射表
@@ -184,7 +190,7 @@ const Home: React.FC = () => {
               
               {/* 记录列表 */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">最近记录 (共{records.length}条)</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">总记录 (近1年共{totalCountLastYear}条)</h3>
                 {isLoading ? (
                   <div className="text-center py-8 text-gray-400">加载中...</div>
                 ) : error ? (

@@ -411,14 +411,17 @@ interface WorkoutRecordState {
   records: any[]
   isLoading: boolean
   error: string | null
+  totalCountLastYear: number
   addRecord: (record: any) => Promise<void>
   getRecords: (planId: string, limit?: number) => Promise<void>
+  getTotalCountLastYear: () => Promise<void>
 }
 
 export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
   records: [],
   isLoading: false,
   error: null,
+  totalCountLastYear: 0,
   addRecord: async (record) => {
     console.log('🔄 开始添加锻炼记录，数据:', record)
     set({ isLoading: true, error: null })
@@ -501,6 +504,37 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
         isLoading: false, 
         error: '从数据库获取锻炼记录失败，请检查网络连接' 
       })
+    }
+  },
+  getTotalCountLastYear: async () => {
+    console.log('🔄 开始获取最近1年锻炼记录总数')
+    set({ isLoading: true, error: null })
+    try {
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ totalCountLastYear: 0, isLoading: false })
+        return
+      }
+
+      const oneYearAgo = new Date()
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+
+      const { count, error } = await supabase
+        .from('workout_records')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', oneYearAgo.toISOString())
+
+      if (error) {
+        console.error('❌ Supabase错误:', error)
+        throw error
+      }
+
+      console.log('✅ 成功获取最近1年锻炼记录总数:', count)
+      set({ totalCountLastYear: count || 0, isLoading: false })
+    } catch (error) {
+      console.error('❌ 获取最近1年锻炼记录总数失败:', error)
+      set({ totalCountLastYear: 0, isLoading: false })
     }
   }
 }))
