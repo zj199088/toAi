@@ -266,7 +266,7 @@ const PlanTemplates: React.FC = () => {
       </form>
 
       {/* 自定义计划 */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-6 border border-cyan-500/30">
+      <div id="custom-plan" className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-6 border border-cyan-500/30">
         <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-6 flex items-center">
           <Target className="h-6 w-6 mr-3 text-cyan-400" />
           自定义计划
