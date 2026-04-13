@@ -11,6 +11,7 @@ interface UserState {
   signOut: () => Promise<void>
   checkAuth: () => Promise<void>
   signInWithWechat: (wechatInfo: any) => Promise<void>
+  updateUser: (metadata: any) => Promise<void>
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -162,6 +163,35 @@ export const useUserStore = create<UserState>((set) => ({
     } catch (error) {
       console.error('微信登录失败:', error)
       set({ error: '微信登录失败，请稍后重试', isLoading: false })
+    }
+  },
+  updateUser: async (metadata) => {
+    set({ isLoading: true, error: null })
+    try {
+      // 从 Supabase 更新用户信息
+      const { data, error } = await supabase.auth.updateUser({
+        data: metadata
+      })
+      
+      if (error) {
+        throw error
+      }
+      
+      // 更新本地用户信息
+      const currentUser = useUserStore.getState().user
+      const updatedUser = {
+        ...currentUser,
+        user_metadata: {
+          ...currentUser.user_metadata,
+          ...metadata
+        }
+      }
+      
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      set({ user: updatedUser, isLoading: false })
+    } catch (error) {
+      console.error('更新用户信息失败:', error)
+      set({ error: '更新用户信息失败，请稍后重试', isLoading: false })
     }
   }
 }))

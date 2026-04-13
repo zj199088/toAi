@@ -1,17 +1,45 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
-import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, UserPlus, Shield, Activity } from 'lucide-react'
+import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, UserPlus, Shield, Activity, Edit, RotateCcw } from 'lucide-react'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAdmin, checkAuth, signOut, error, isLoading } = useUserStore()
+  const { user, isAdmin, checkAuth, signOut, updateUser, error, isLoading } = useUserStore()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editDisplayName, setEditDisplayName] = useState('')
+  const [editName, setEditName] = useState('')
+  const [editAvatar, setEditAvatar] = useState('')
 
   useEffect(() => {
     checkAuth()
   }, [])
+
+  // 初始化编辑表单的默认值
+  useEffect(() => {
+    if (user) {
+      setEditDisplayName(user.user_metadata?.displayName || '')
+      setEditName(user.user_metadata?.name || '')
+      setEditAvatar(user.user_metadata?.avatar || '')
+    }
+  }, [user])
+
+  // 处理编辑表单提交
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await updateUser({
+        displayName: editDisplayName,
+        name: editName,
+        avatar: editAvatar
+      })
+      setShowEditModal(false)
+    } catch (error) {
+      console.error('编辑用户信息失败:', error)
+    }
+  }
   
   const navItems = [
     { name: '首页', path: '/', icon: <Home className="h-5 w-5" /> },
@@ -90,21 +118,30 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="p-4 border-t border-cyan-500/20">
             {user ? (
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                  {user.user_metadata?.avatar ? (
-                    <img 
-                      src={user.user_metadata.avatar} 
-                      alt="用户头像" 
-                      className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center border-2 border-cyan-400">
-                      <User className="h-5 w-5 text-white" />
+                <div className="relative p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="absolute top-2 right-2 p-1.5 bg-slate-700/50 rounded-lg text-gray-400 hover:bg-slate-600/50 hover:text-cyan-400 transition-all duration-300"
+                    title="编辑用户信息"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <div className="flex items-center space-x-3">
+                    {user.user_metadata?.avatar ? (
+                      <img 
+                        src={user.user_metadata.avatar} 
+                        alt="用户头像" 
+                        className="w-10 h-10 rounded-full object-cover border-2 border-cyan-400"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center border-2 border-cyan-400">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-white">{user.user_metadata?.displayName || user.user_metadata?.name || user.email.split('@')[0] || '用户'}</p>
+                      <p className="text-xs text-gray-400">{user.email || 'user@example.com'}</p>
                     </div>
-                  )}
-                  <div>
-                    <p className="font-medium text-white">{user.user_metadata?.displayName || user.user_metadata?.name || user.email.split('@')[0] || '用户'}</p>
-                    <p className="text-xs text-gray-400">{user.email || 'user@example.com'}</p>
                   </div>
                 </div>
                 <button
@@ -163,6 +200,89 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
           </div>
         </header>
+
+        {/* 编辑用户信息模态框 */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-8 max-w-md w-full border border-cyan-500/30 shadow-2xl overflow-hidden">
+              {/* 科技感背景装饰 */}
+              <div className="absolute top-0 left-0 w-full h-full opacity-10">
+                <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-cyan-500 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-purple-500 rounded-full blur-3xl" />
+              </div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                    编辑用户信息
+                  </h3>
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <form onSubmit={handleEditSubmit} className="space-y-5">
+                  <div>
+                    <label htmlFor="editDisplayName" className="block text-sm font-bold text-gray-300 mb-2">
+                      显示名称
+                    </label>
+                    <input
+                      type="text"
+                      id="editDisplayName"
+                      value={editDisplayName}
+                      onChange={(e) => setEditDisplayName(e.target.value)}
+                      className="w-full px-5 py-3 bg-slate-800/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                      placeholder="请输入显示名称"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="editName" className="block text-sm font-bold text-gray-300 mb-2">
+                      姓名
+                    </label>
+                    <input
+                      type="text"
+                      id="editName"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="w-full px-5 py-3 bg-slate-800/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                      placeholder="请输入姓名"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="editAvatar" className="block text-sm font-bold text-gray-300 mb-2">
+                      头像 URL
+                    </label>
+                    <input
+                      type="url"
+                      id="editAvatar"
+                      value={editAvatar}
+                      onChange={(e) => setEditAvatar(e.target.value)}
+                      className="w-full px-5 py-3 bg-slate-800/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                      placeholder="请输入头像 URL"
+                    />
+                  </div>
+                  <div className="flex space-x-4 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="flex-1 py-3 px-6 bg-slate-700/50 border border-slate-500 text-gray-300 rounded-xl hover:bg-slate-600/50 transition-all duration-300 font-bold"
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-3 px-6 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg shadow-cyan-500/40"
+                    >
+                      保存
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* 内容区域 */}
         <main className="container mx-auto px-4 py-8">
