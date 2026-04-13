@@ -16,7 +16,7 @@ interface UserState {
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   isAdmin: false,
-  isLoading: true,
+  isLoading: false,
   error: null,
   signUp: async (email, password, name) => {
     set({ isLoading: true, error: null })
