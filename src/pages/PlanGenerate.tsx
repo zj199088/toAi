@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { useFitnessPlanStore } from '../store'
+import { useFitnessPlanStore, useUserStore } from '../store'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '../utils/cn'
-import { Upload, Activity, Target, Calendar, ChevronRight } from 'lucide-react'
+import { Upload, Activity, Target, Calendar, ChevronRight, Brain, FileText } from 'lucide-react'
 
 const PlanGenerate: React.FC = () => {
   const { createPlan } = useFitnessPlanStore()
+  const { user } = useUserStore()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
@@ -25,20 +26,20 @@ const PlanGenerate: React.FC = () => {
     e.preventDefault()
     setIsAnalyzing(true)
 
-    // 模拟体检报告分析过程
+    // 模拟AI分析体检报告过程
     setTimeout(async () => {
       const startDate = new Date()
       const endDate = new Date()
       endDate.setDate(startDate.getDate() + formData.duration * 7)
 
       const plan = {
-        name: formData.name || `${formData.goal}计划`,
-        type: 'custom',
+        name: formData.name || `${formData.goal}AI计划`,
+        type: 'ai',
         goal: formData.goal,
         duration: formData.duration,
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
-        user_id: 'user123' // 实际项目中应该从用户状态中获取
+        user_id: user?.id || 'user123' // 使用真实用户ID
       }
 
       await createPlan(plan)
@@ -53,10 +54,11 @@ const PlanGenerate: React.FC = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-          生成个性化健身计划
+        <h1 className="text-4xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent flex items-center">
+          <Brain className="h-10 w-10 mr-3 text-cyan-400 animate-pulse" />
+          AI智能健身计划
         </h1>
-        <p className="text-gray-400">上传体检报告，设置目标，获取专属健身计划</p>
+        <p className="text-gray-400">上传体检报告，AI大模型分析健康状况，为您定制专属运动方案</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-6 border border-cyan-500/30">
@@ -129,7 +131,8 @@ const PlanGenerate: React.FC = () => {
 
           {/* 体检报告上传 */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center">
+              <FileText className="h-4 w-4 mr-2 text-cyan-400" />
               上传体检报告
             </label>
             <div className="border-2 border-dashed border-cyan-500/30 rounded-xl p-6 text-center bg-slate-800/50">
@@ -179,12 +182,12 @@ const PlanGenerate: React.FC = () => {
             >
               {isAnalyzing ? (
                 <>
-                  <Activity className="animate-spin h-5 w-5 mr-2 text-cyan-300" />
-                  分析体检报告...
+                  <Brain className="animate-spin h-5 w-5 mr-2 text-cyan-300" />
+                  AI分析体检报告中...
                 </>
               ) : (
                 <>
-                  生成计划
+                  AI生成计划
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </>
               )}
@@ -195,23 +198,26 @@ const PlanGenerate: React.FC = () => {
 
       {/* 提示信息 */}
       <div className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-xl p-6">
-        <h3 className="text-lg font-medium bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3">生成计划说明</h3>
+        <h3 className="text-lg font-medium bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3 flex items-center">
+          <Brain className="h-5 w-5 mr-2 text-cyan-400" />
+          AI计划生成说明
+        </h3>
         <ul className="space-y-3 text-sm text-gray-300">
           <li className="flex items-start">
             <span className="mr-2 text-cyan-400">•</span>
-            上传体检报告后，系统会分析您的身体状况
+            上传体检报告后，AI大模型会分析您的健康状况
           </li>
           <li className="flex items-start">
             <span className="mr-2 text-cyan-400">•</span>
-            根据您的健身目标，生成个性化的训练计划
+            根据分析结果和健身目标，智能安排适合的运动项目
           </li>
           <li className="flex items-start">
             <span className="mr-2 text-cyan-400">•</span>
-            计划包含详细的训练内容、饮食建议和进度跟踪
+            生成的计划包含详细的训练内容、强度建议和进度跟踪
           </li>
           <li className="flex items-start">
             <span className="mr-2 text-cyan-400">•</span>
-            生成后，您可以在「锻炼跟踪」页面查看和执行计划
+            生成后，与选择模板一样保存到数据库，您可以在「锻炼跟踪」页面查看和执行计划
           </li>
         </ul>
       </div>
