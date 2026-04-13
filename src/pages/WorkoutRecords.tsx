@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useWorkoutRecordStore, useFitnessPlanStore } from '../store'
 import { supabase } from '../lib/supabase'
+import { formatChinaDate, formatChinaTime } from '../lib/utils'
 import { Activity, Calendar, Dumbbell, Zap, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const WorkoutRecords: React.FC = () => {
@@ -130,10 +131,10 @@ const WorkoutRecords: React.FC = () => {
                       <div className="text-sm text-gray-400 flex flex-col items-end">
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4 text-cyan-400" />
-                          <span>{record.date || new Date(record.created_at).toISOString().split('T')[0]}</span>
+                          <span>{record.date || formatChinaDate(record.created_at)}</span>
                         </div>
                         <div className="mt-1">
-                          {new Date(record.created_at || record.date).toLocaleTimeString('zh-CN')}
+                          {formatChinaTime(record.created_at || record.date)}
                         </div>
                       </div>
                     </div>

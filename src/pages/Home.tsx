@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useUserStore, useFitnessPlanStore, useWorkoutRecordStore } from '../store'
 import { supabase } from '../lib/supabase'
+import { formatChinaDateTime } from '../lib/utils'
 import { Link } from 'react-router-dom'
 import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer } from 'lucide-react'
 
@@ -195,7 +196,7 @@ const Home: React.FC = () => {
                             </div>
                           </div>
                           <div className="text-sm text-gray-400">
-                            {new Date(record.created_at || record.date).toLocaleString('zh-CN')}
+                            {formatChinaDateTime(record.created_at || record.date)}
                           </div>
                         </div>
                       </div>
