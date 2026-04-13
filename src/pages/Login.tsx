@@ -6,7 +6,7 @@ import { Mail, Lock, User, MessageSquare } from 'lucide-react'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
-  const { signIn, signInWithWechat, error, isLoading } = useUserStore()
+  const { signUp, signIn, signInWithWechat, error, isLoading } = useUserStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
@@ -15,9 +15,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isRegistering) {
-      // 这里应该调用注册方法
-      // 暂时使用登录方法模拟
-      await signIn(email, password)
+      await signUp(email, password, name)
     } else {
       await signIn(email, password)
     }
