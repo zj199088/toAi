@@ -337,7 +337,6 @@ const Track: React.FC = () => {
             plan_id: currentPlan.id,
             schedule_id: schedule.id,
             exercise_id: exerciseId,
-            date: selectedDay.toISOString().split('T')[0],
             sets_completed: 3,
             reps_completed: 15,
             created_at: new Date().toISOString()
@@ -365,7 +364,8 @@ const Track: React.FC = () => {
               id: generateUUID(),
               plan_id: currentPlan.id,
               day: planDay,
-              date: selectedDay.toISOString().split('T')[0],
+              workout_type: currentWorkout?.type || '通用训练',
+              description: `第 ${planDay} 天训练`,
               created_at: new Date().toISOString()
             })
             .select()
@@ -423,7 +423,6 @@ const Track: React.FC = () => {
             plan_id: currentPlan.id,
             schedule_id: schedule.id,
             exercise_id: exerciseId,
-            date: selectedDay.toISOString().split('T')[0],
             sets_completed: 3,
             reps_completed: 15,
             created_at: new Date().toISOString()
