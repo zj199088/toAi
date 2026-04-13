@@ -16,12 +16,10 @@ export default function App() {
   const { checkAuth, isAdmin, isLoading } = useUserStore()
 
   useEffect(() => {
-    // 暂时注释掉认证检查，以解决加载中问题
-    // checkAuth()
+    checkAuth()
   }, [checkAuth])
 
-  // 暂时强制设置isLoading为false，以解决加载中问题
-  if (false) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
         <div className="text-center">

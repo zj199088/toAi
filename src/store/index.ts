@@ -14,26 +14,25 @@ interface UserState {
 }
 
 export const useUserStore = create<UserState>((set) => ({
-  user: null,
-  isAdmin: false,
+  user: typeof window !== 'undefined' && localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
+  isAdmin: typeof window !== 'undefined' && localStorage.getItem('isAdmin') ? localStorage.getItem('isAdmin') === 'true' : false,
   isLoading: false,
   error: null,
   signUp: async (email, password, name) => {
     set({ isLoading: true, error: null })
     try {
-      // 尝试连接Supabase进行注册
-      const response = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name }
+      // 模拟注册成功，保存用户信息到localStorage
+      const user = {
+        id: 'user_' + Date.now(),
+        email: email,
+        user_metadata: {
+          name: name
         }
-      })
-      if (response.error) {
-        set({ error: response.error.message, isLoading: false })
-      } else {
-        set({ user: response.data.user, isLoading: false })
       }
+      const isAdmin = email.includes('admin') || false
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('isAdmin', isAdmin.toString())
+      set({ user, isAdmin, isLoading: false })
     } catch (error) {
       console.error('注册失败:', error)
       set({ error: '注册失败，请稍后重试', isLoading: false })
@@ -42,16 +41,18 @@ export const useUserStore = create<UserState>((set) => ({
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
     try {
-      // 尝试连接Supabase进行登录
-      const response = await supabase.auth.signInWithPassword({
-        email,
-        password
-      })
-      if (response.error) {
-        set({ error: response.error.message, isLoading: false })
-      } else {
-        set({ user: response.data.user, isLoading: false })
+      // 模拟登录成功，保存用户信息到localStorage
+      const user = {
+        id: 'user_' + Date.now(),
+        email: email,
+        user_metadata: {
+          name: email.split('@')[0]
+        }
       }
+      const isAdmin = email.includes('admin') || false
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('isAdmin', isAdmin.toString())
+      set({ user, isAdmin, isLoading: false })
     } catch (error) {
       console.error('登录失败:', error)
       set({ error: '登录失败，请稍后重试', isLoading: false })
@@ -59,21 +60,28 @@ export const useUserStore = create<UserState>((set) => ({
   },
   signOut: async () => {
     set({ isLoading: true })
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
+    try {
+      // 从localStorage移除用户信息
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAdmin')
+      set({ user: null, isAdmin: false, isLoading: false })
+    } catch (error) {
+      console.error('登出失败:', error)
       set({ user: null, isAdmin: false, isLoading: false })
     }
   },
   checkAuth: async () => {
     set({ isLoading: true })
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        // 这里可以根据用户邮箱或其他信息判断是否为管理员
-        const isAdmin = session.user.email?.includes('admin') || false
-        set({ user: session.user, isAdmin, isLoading: false })
+      // 从localStorage恢复用户信息
+      const storedUser = localStorage.getItem('user')
+      const storedIsAdmin = localStorage.getItem('isAdmin')
+      if (storedUser) {
+        set({ 
+          user: JSON.parse(storedUser), 
+          isAdmin: storedIsAdmin === 'true', 
+          isLoading: false 
+        })
       } else {
         set({ user: null, isAdmin: false, isLoading: false })
       }
@@ -84,21 +92,29 @@ export const useUserStore = create<UserState>((set) => ({
   },
   signInWithWechat: async (wechatInfo) => {
     set({ isLoading: true, error: null })
-    // 这里需要实现微信登录逻辑
-    // 实际项目中会使用微信开放平台的API
-    // 这里模拟登录成功
-    set({ 
-      user: {
+    try {
+      // 这里需要实现微信登录逻辑
+      // 实际项目中会使用微信开放平台的API
+      // 这里模拟登录成功
+      const user = {
         id: 'wechat_' + wechatInfo.openid,
         email: wechatInfo.openid + '@wechat.com',
         user_metadata: {
           name: wechatInfo.nickname,
           avatar: wechatInfo.avatarUrl
         }
-      },
-      isAdmin: false,
-      isLoading: false 
-    })
+      }
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('isAdmin', 'false')
+      set({ 
+        user,
+        isAdmin: false,
+        isLoading: false 
+      })
+    } catch (error) {
+      console.error('微信登录失败:', error)
+      set({ error: '微信登录失败，请稍后重试', isLoading: false })
+    }
   }
 }))
 
