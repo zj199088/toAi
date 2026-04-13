@@ -249,10 +249,16 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
         return baseExercises[goal] || baseExercises['减脂']
       }
 
-      // 创建7天的训练日程
-      for (let day = 1; day <= 7; day++) {
+      // 计算计划总天数
+      const totalDays = plan.duration * 7
+      console.log(`📅 计划总天数: ${totalDays}天`)
+
+      // 为整个计划期间创建训练日程
+      for (let day = 1; day <= totalDays; day++) {
+        // 计算是星期几（1-7）
+        const dayOfWeek = ((day - 1) % 7) + 1
         let workoutType = ''
-        switch (day) {
+        switch (dayOfWeek) {
           case 1: workoutType = '胸+核心'; break
           case 2: workoutType = '背+核心'; break
           case 3: workoutType = '腿+核心'; break
@@ -271,7 +277,7 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
               plan_id: fitnessPlan.id,
               day: day,
               workout_type: workoutType,
-              description: `${workoutType}训练`,
+              description: `${workoutType}训练 (第${Math.ceil(day/7)}周)`,
               created_at: new Date().toISOString()
             })
             .select()
@@ -282,10 +288,10 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
 
           const schedule = scheduleData[0]
           workoutSchedules.push(schedule)
-          console.log(`✅ 成功创建训练日程 (第${day}天):`, schedule)
+          console.log(`✅ 成功创建训练日程 (第${day}天, 第${Math.ceil(day/7)}周):`, schedule)
 
           // 创建训练动作
-          const exercises = getExercisesByGoal(plan.goal, day)
+          const exercises = getExercisesByGoal(plan.goal, dayOfWeek)
           for (const exercise of exercises) {
             const { error: exerciseError } = await supabase
               .from('workout_exercises')

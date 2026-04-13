@@ -128,6 +128,8 @@ const Track: React.FC = () => {
   }
 
   const getCurrentWorkout = () => {
+    // 对于演示，我们仍然使用星期几来获取当前训练
+    // 实际项目中应该计算计划开始后过了多少天
     const dayOfWeek = selectedDay.getDay() || 7 // 调整为1-7
     return workoutSchedule.find(w => w.day === dayOfWeek)
   }
@@ -232,16 +234,28 @@ const Track: React.FC = () => {
       };
 
       try {
-        // 获取当前日期对应的训练日程
-        const dayOfWeek = selectedDay.getDay() || 7 // 调整为1-7
-        console.log('📅 当前星期几:', dayOfWeek)
+        // 计算当前是计划的第几天
+        if (!currentPlan.start_date) {
+          console.error('❌ 计划没有开始日期')
+          return
+        }
+        
+        const startDate = new Date(currentPlan.start_date)
+        const today = new Date(selectedDay.toDateString())
+        const daysSinceStart = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        
+        // 确保 daysSinceStart 为正数
+        const planDay = Math.max(1, daysSinceStart)
+        console.log('📅 计划开始日期:', startDate)
+        console.log('📅 今天日期:', today)
+        console.log('📅 计划第几天:', planDay)
 
         // 从数据库获取训练日程
         const { data: schedules, error: scheduleError } = await supabase
           .from('workout_schedules')
           .select('*')
           .eq('plan_id', currentPlan.id)
-          .eq('day', dayOfWeek)
+          .eq('day', planDay)
 
         if (scheduleError) {
           console.error('❌ 获取训练日程失败:', scheduleError)
