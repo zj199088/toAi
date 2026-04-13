@@ -244,17 +244,15 @@ const Track: React.FC = () => {
       
       console.log('📝 准备保存的记录:', record)
       
-      // 尝试添加记录到数据库
+      // 保存记录到数据库
       await addRecord(record)
       
-      // 同时保存到本地存储作为 fallback
+      // 清除本地存储，确保只使用数据库数据
       try {
-        const existingRecords = JSON.parse(localStorage.getItem('workout_records') || '[]')
-        existingRecords.push({ ...record, id: `local_${Date.now()}` })
-        localStorage.setItem('workout_records', JSON.stringify(existingRecords))
-        console.log('✅ 已保存到本地存储')
+        localStorage.removeItem('workout_records')
+        console.log('✅ 已清除本地存储，只使用数据库数据')
       } catch (error) {
-        console.error('❌ 保存锻炼记录到本地存储失败:', error)
+        console.error('❌ 清除本地存储失败:', error)
       }
     } else {
       console.log('⚠️ 并非所有组都完成，不添加记录')
