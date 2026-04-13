@@ -44,7 +44,7 @@ const Home: React.FC = () => {
             科学健身，成就更好的自己
           </h1>
           <p className="text-lg md:text-xl mb-8 opacity-90">
-            {user ? `欢迎回来，${user.user_metadata?.name || user.user_metadata?.displayName || user.email}` : '欢迎使用健身计划系统'}，
+            {user ? `欢迎回来，${user.user_metadata?.name || user.user_metadata?.displayName || user.email}` : '欢迎使用久坐赎罪健身'}，
             {currentPlan ? '你的健身计划正在进行中' : '开始你的健康之旅'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">

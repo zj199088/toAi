@@ -32,7 +32,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-blue-600">
-            健身计划系统
+            久坐赎罪健身
           </Link>
           
           {/* 桌面导航 */}
@@ -184,7 +184,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* 页脚 */}
       <footer className="bg-white border-t py-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>© 2026 健身计划系统. 保留所有权利.</p>
+          <p>© 2026 久坐赎罪健身. 保留所有权利.</p>
         </div>
       </footer>
     </div>
