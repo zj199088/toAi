@@ -6,11 +6,11 @@ interface UserState {
   isAdmin: boolean
   isLoading: boolean
   error: string | null
-  signUp: (email: string, password: string, name: string) => Promise<void>
-  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, name: string) => Promise<boolean>
+  signIn: (email: string, password: string) => Promise<boolean>
   signOut: () => Promise<void>
   checkAuth: () => Promise<void>
-  signInWithWechat: (wechatInfo: any) => Promise<void>
+  signInWithWechat: (wechatInfo: any) => Promise<boolean>
   updateUser: (metadata: any) => Promise<void>
 }
 
@@ -51,9 +51,11 @@ export const useUserStore = create<UserState>((set) => ({
       localStorage.setItem('user', JSON.stringify(user))
       localStorage.setItem('isAdmin', isAdmin.toString())
       set({ user, isAdmin, isLoading: false })
+      return true
     } catch (error) {
       console.error('注册失败:', error)
       set({ error: '注册失败，请稍后重试', isLoading: false })
+      return false
     }
   },
   signIn: async (email, password) => {
@@ -82,9 +84,11 @@ export const useUserStore = create<UserState>((set) => ({
       localStorage.setItem('user', JSON.stringify(user))
       localStorage.setItem('isAdmin', isAdmin.toString())
       set({ user, isAdmin, isLoading: false })
+      return true
     } catch (error) {
       console.error('登录失败:', error)
       set({ error: '登录失败，请稍后重试', isLoading: false })
+      return false
     }
   },
   signOut: async () => {
@@ -160,9 +164,11 @@ export const useUserStore = create<UserState>((set) => ({
         isAdmin: false,
         isLoading: false 
       })
+      return true
     } catch (error) {
       console.error('微信登录失败:', error)
       set({ error: '微信登录失败，请稍后重试', isLoading: false })
+      return false
     }
   },
   updateUser: async (metadata) => {

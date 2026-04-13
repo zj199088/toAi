@@ -14,13 +14,14 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    let success = false
     if (isRegistering) {
-      await signUp(email, password, name)
+      success = await signUp(email, password, name)
     } else {
-      await signIn(email, password)
+      success = await signIn(email, password)
     }
-    // 只有在没有错误且用户已登录时才导航
-    if (!error) {
+    // 只有在登录成功时才导航
+    if (success) {
       navigate('/')
     }
   }
@@ -32,9 +33,9 @@ const Login: React.FC = () => {
       nickname: '微信用户',
       avatarUrl: 'https://via.placeholder.com/150'
     }
-    await signInWithWechat(mockWechatInfo)
-    // 只有在没有错误且用户已登录时才导航
-    if (!error) {
+    const success = await signInWithWechat(mockWechatInfo)
+    // 只有在登录成功时才导航
+    if (success) {
       navigate('/')
     }
   }
