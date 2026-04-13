@@ -7,10 +7,26 @@ import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Ti
 
 const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
-  const { currentPlan } = useFitnessPlanStore()
+  const { currentPlan, getPlans } = useFitnessPlanStore()
   const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
   const [exerciseMap, setExerciseMap] = useState<Record<string, string>>({})
   const [loadingExercises, setLoadingExercises] = useState(true)
+  const [loadingPlans, setLoadingPlans] = useState(true)
+
+  useEffect(() => {
+    const loadPlans = async () => {
+      setLoadingPlans(true)
+      try {
+        await getPlans()
+      } catch (error) {
+        console.error('获取健身计划失败:', error)
+      } finally {
+        setLoadingPlans(false)
+      }
+    }
+    
+    loadPlans()
+  }, [getPlans])
 
   useEffect(() => {
     if (currentPlan) {
