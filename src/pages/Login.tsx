@@ -15,11 +15,7 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔐 开始登录流程...')
-    if (isSubmitting || isLoading) {
-      console.log('⏭️  已在处理中，跳过')
-      return
-    }
+    if (isSubmitting || isLoading) return
     setIsSubmitting(true)
     
     let success = false
@@ -30,11 +26,11 @@ const Login: React.FC = () => {
     }
     
     setIsSubmitting(false)
-    console.log('✅ 登录完成，成功:', success)
-    // 只有在登录成功时才导航
+    // 只有在登录成功时才导航，添加延迟确保状态同步
     if (success) {
-      console.log('🚀 准备导航到首页...')
-      navigate('/')
+      setTimeout(() => {
+        navigate('/')
+      }, 150)
     }
   }
 
