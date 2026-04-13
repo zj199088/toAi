@@ -153,8 +153,12 @@ const Track: React.FC = () => {
   }, [selectedDay])
 
   // 切换组的完成状态
-  const toggleSetComplete = (exerciseName: string, setIndex: number) => {
+  const toggleSetComplete = async (exerciseName: string, setIndex: number) => {
+    console.log('👆 toggleSetComplete 被调用:', { exerciseName, setIndex })
     const lastSetIndex = lastCompletedSetIndex[exerciseName] ?? -1
+    console.log('📊 最后完成组索引:', lastSetIndex)
+    
+    let willCompleteAllSets = false
     
     setExerciseSets(prev => {
       const updatedSets = { ...prev }
@@ -164,29 +168,37 @@ const Track: React.FC = () => {
         // 如果点击的是第1组（索引0），并且最后完成组索引是-1或0，则可以切换
         if (setIndex === 0 && (lastSetIndex === -1 || lastSetIndex === 0)) {
           updatedSets[exerciseName][setIndex] = !updatedSets[exerciseName][setIndex]
+          console.log('🔄 切换第1组状态:', updatedSets[exerciseName][setIndex])
           // 更新最后完成组索引
           setLastCompletedSetIndex(prevLast => ({
             ...prevLast,
             [exerciseName]: updatedSets[exerciseName][setIndex] ? 0 : -1
           }))
+          // 检查是否所有组都完成了
+          willCompleteAllSets = updatedSets[exerciseName].every(set => set)
         } 
         // 如果点击的是比最后完成组索引大1的组，则可以标记为完成
         else if (setIndex === lastSetIndex + 1) {
           updatedSets[exerciseName][setIndex] = true
+          console.log('✅ 标记第', setIndex + 1, '组为完成')
           setLastCompletedSetIndex(prevLast => ({
             ...prevLast,
             [exerciseName]: setIndex
           }))
-          
           // 检查是否所有组都完成了
-          if (updatedSets[exerciseName].every(set => set)) {
-            // 自动调用完成练习函数
-            handleExerciseComplete(exerciseName)
-          }
+          willCompleteAllSets = updatedSets[exerciseName].every(set => set)
         }
       }
       return updatedSets
     })
+    
+    // 如果所有组都完成了，调用 handleExerciseComplete
+    if (willCompleteAllSets) {
+      console.log('🎉 所有组都完成了！调用 handleExerciseComplete')
+      setTimeout(() => {
+        handleExerciseComplete(exerciseName)
+      }, 100)
+    }
   }
 
   // 检查练习是否全部完成
@@ -196,33 +208,50 @@ const Track: React.FC = () => {
   }
 
   // 当练习全部完成时添加记录
-  const handleExerciseComplete = (exerciseName: string) => {
-    if (!currentPlan) return
+  const handleExerciseComplete = async (exerciseName: string) => {
+    console.log('🎯 handleExerciseComplete 被调用，练习名称:', exerciseName)
+    console.log('👤 用户信息:', user)
+    console.log('📋 当前计划:', currentPlan)
+    
+    if (!currentPlan) {
+      console.error('❌ 没有当前计划，无法添加记录')
+      return
+    }
 
     // 只有当所有组都完成时才添加记录
     if (isExerciseComplete(exerciseName)) {
+      console.log('✅ 所有组都已完成，准备添加记录')
+      
       const record = {
         user_id: user?.id || user?.user_metadata?.id || 'user123',
         plan_id: currentPlan.id,
         schedule_id: 'schedule123',
         exercise_id: `exercise_${exerciseName}`,
+        exercise: exerciseName,
         date: selectedDay.toISOString().split('T')[0],
         sets_completed: 3,
         reps_completed: 15,
+        sets: 3,
+        reps: 15,
         created_at: new Date().toISOString()
       }
       
+      console.log('📝 准备保存的记录:', record)
+      
       // 尝试添加记录到数据库
-      addRecord(record)
+      await addRecord(record)
       
       // 同时保存到本地存储作为 fallback
       try {
         const existingRecords = JSON.parse(localStorage.getItem('workout_records') || '[]')
-        existingRecords.push(record)
+        existingRecords.push({ ...record, id: `local_${Date.now()}` })
         localStorage.setItem('workout_records', JSON.stringify(existingRecords))
+        console.log('✅ 已保存到本地存储')
       } catch (error) {
-        console.error('保存锻炼记录到本地存储失败:', error)
+        console.error('❌ 保存锻炼记录到本地存储失败:', error)
       }
+    } else {
+      console.log('⚠️ 并非所有组都完成，不添加记录')
     }
   }
 

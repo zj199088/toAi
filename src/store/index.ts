@@ -248,9 +248,11 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
   isLoading: false,
   error: null,
   addRecord: async (record) => {
+    console.log('🔄 开始添加锻炼记录，数据:', record)
     set({ isLoading: true, error: null })
     try {
       // 保存到Supabase数据库
+      console.log('📡 尝试保存到Supabase数据库...')
       const { data, error } = await supabase
         .from('workout_records')
         .insert({
@@ -260,27 +262,32 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
         .select()
 
       if (error) {
+        console.error('❌ Supabase错误:', error)
         throw error
       }
 
+      console.log('✅ 成功保存到数据库:', data)
       set((state) => ({ 
         records: [...state.records, data[0]],
         isLoading: false 
       }))
     } catch (error) {
-      console.error('添加锻炼记录到数据库失败:', error)
+      console.error('❌ 添加锻炼记录到数据库失败:', error)
       // 即使数据库失败，也将记录添加到状态中
+      const recordWithId = { ...record, id: `local_${Date.now()}` }
       set((state) => ({ 
-        records: [...state.records, record],
+        records: [...state.records, recordWithId],
         isLoading: false,
         error: '添加锻炼记录到数据库失败，已保存到本地' 
       }))
     }
   },
   getRecords: async (planId) => {
+    console.log('🔄 开始获取锻炼记录，planId:', planId)
     set({ isLoading: true, error: null })
     try {
       // 从Supabase数据库获取锻炼记录
+      console.log('📡 尝试从Supabase获取记录...')
       const { data, error } = await supabase
         .from('workout_records')
         .select('*')
@@ -288,19 +295,22 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.error('❌ Supabase错误:', error)
         throw error
       }
 
+      console.log('✅ 成功从数据库获取记录:', data)
       set({ records: data || [], isLoading: false })
     } catch (error) {
-      console.error('从数据库获取锻炼记录失败:', error)
+      console.error('❌ 从数据库获取锻炼记录失败:', error)
       // 尝试从本地存储获取记录
       try {
         const existingRecords = JSON.parse(localStorage.getItem('workout_records') || '[]')
         const planRecords = existingRecords.filter((r: any) => r.plan_id === planId)
+        console.log('📝 从本地存储获取记录:', planRecords)
         set({ records: planRecords, isLoading: false, error: '从数据库获取锻炼记录失败，已使用本地数据' })
       } catch (localError) {
-        console.error('从本地存储获取锻炼记录失败:', localError)
+        console.error('❌ 从本地存储获取锻炼记录失败:', localError)
         set({ records: [], isLoading: false, error: '获取锻炼记录失败' })
       }
     }
