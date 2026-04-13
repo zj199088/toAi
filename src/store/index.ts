@@ -21,13 +21,29 @@ export const useUserStore = create<UserState>((set) => ({
   signUp: async (email, password, name) => {
     set({ isLoading: true, error: null })
     try {
-      // 模拟注册成功，保存用户信息到localStorage
-      const user = {
-        id: 'user_' + Date.now(),
+      // 实际从Supabase注册
+      const { data, error } = await supabase.auth.signUp({
         email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            displayName: name
+          }
+        }
+      })
+      
+      if (error) {
+        throw error
+      }
+      
+      const user = {
+        id: data.user?.id || 'user_' + Date.now(),
+        email: data.user?.email || email,
         user_metadata: {
-          name: name,
-          displayName: name
+          name: data.user?.user_metadata?.name || name,
+          displayName: data.user?.user_metadata?.displayName || name,
+          ...data.user?.user_metadata
         }
       }
       const isAdmin = email.includes('admin') || false
@@ -42,14 +58,23 @@ export const useUserStore = create<UserState>((set) => ({
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
     try {
-      // 模拟登录成功，保存用户信息到localStorage
-      const displayName = email.split('@')[0]
-      const user = {
-        id: 'user_' + Date.now(),
+      // 实际从Supabase登录
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
+        password: password
+      })
+      
+      if (error) {
+        throw error
+      }
+      
+      const user = {
+        id: data.user?.id || 'user_' + Date.now(),
+        email: data.user?.email || email,
         user_metadata: {
-          name: displayName,
-          displayName: displayName
+          name: data.user?.user_metadata?.name || data.user?.email?.split('@')[0] || email.split('@')[0],
+          displayName: data.user?.user_metadata?.displayName || data.user?.email?.split('@')[0] || email.split('@')[0],
+          ...data.user?.user_metadata
         }
       }
       const isAdmin = email.includes('admin') || false
@@ -64,6 +89,8 @@ export const useUserStore = create<UserState>((set) => ({
   signOut: async () => {
     set({ isLoading: true })
     try {
+      // 实际从Supabase登出
+      await supabase.auth.signOut()
       // 从localStorage移除用户信息
       localStorage.removeItem('user')
       localStorage.removeItem('isAdmin')
@@ -76,17 +103,36 @@ export const useUserStore = create<UserState>((set) => ({
   checkAuth: async () => {
     set({ isLoading: true })
     try {
-      // 从localStorage恢复用户信息
-      const storedUser = localStorage.getItem('user')
-      const storedIsAdmin = localStorage.getItem('isAdmin')
-      if (storedUser) {
-        set({ 
-          user: JSON.parse(storedUser), 
-          isAdmin: storedIsAdmin === 'true', 
-          isLoading: false 
-        })
+      // 实际从Supabase检查认证状态
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        const user = {
+          id: session.user.id,
+          email: session.user.email || '',
+          user_metadata: {
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
+            displayName: session.user.user_metadata?.displayName || session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
+            ...session.user.user_metadata
+          }
+        }
+        const isAdmin = session.user.email?.includes('admin') || false
+        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('isAdmin', isAdmin.toString())
+        set({ user, isAdmin, isLoading: false })
       } else {
-        set({ user: null, isAdmin: false, isLoading: false })
+        // 从localStorage恢复用户信息
+        const storedUser = localStorage.getItem('user')
+        const storedIsAdmin = localStorage.getItem('isAdmin')
+        if (storedUser) {
+          set({ 
+            user: JSON.parse(storedUser), 
+            isAdmin: storedIsAdmin === 'true', 
+            isLoading: false 
+          })
+        } else {
+          set({ user: null, isAdmin: false, isLoading: false })
+        }
       }
     } catch (error) {
       console.error('认证检查失败:', error)
