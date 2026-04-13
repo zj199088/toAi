@@ -2,15 +2,21 @@ import React, { useState, useEffect } from 'react'
 import { useWorkoutRecordStore, useFitnessPlanStore } from '../store'
 import { supabase } from '../lib/supabase'
 import { formatChinaDate, formatChinaTime } from '../lib/utils'
-import { Activity, Calendar, Dumbbell, Zap, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Activity, Calendar, Dumbbell, Zap, Timer, ChevronLeft, ChevronRight, Search, Filter, X } from 'lucide-react'
 
 const WorkoutRecords: React.FC = () => {
   const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
-  const { currentPlan, getPlans } = useFitnessPlanStore()
+  const { plans, getPlans } = useFitnessPlanStore()
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(10)
   const [exerciseMap, setExerciseMap] = useState<Record<string, string>>({})
   const [loadingExercises, setLoadingExercises] = useState(true)
+  
+  // 查询条件状态
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [planName, setPlanName] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     // 首先获取健身计划
@@ -21,14 +27,10 @@ const WorkoutRecords: React.FC = () => {
   }, [getPlans])
 
   useEffect(() => {
-    // 当有当前计划时，获取锻炼记录
-    if (currentPlan) {
-      console.log('✅ 获取当前计划的锻炼记录，planId:', currentPlan.id)
-      getRecords(currentPlan.id)
-    } else {
-      console.log('⚠️ 没有当前计划')
-    }
-  }, [currentPlan, getRecords])
+    // 获取所有锻炼记录，支持查询条件
+    console.log('✅ 获取锻炼记录，查询条件:', { startDate, endDate, planName })
+    getRecords(undefined, undefined, startDate, endDate, planName)
+  }, [getRecords, startDate, endDate, planName])
 
   useEffect(() => {
     // 获取所有锻炼动作，构建映射表
@@ -67,6 +69,17 @@ const WorkoutRecords: React.FC = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
 
+  // 重置查询条件
+  const resetFilters = () => {
+    setStartDate('')
+    setEndDate('')
+    setPlanName('')
+    setCurrentPage(1)
+  }
+
+  // 检查是否有查询条件
+  const hasFilters = startDate || endDate || planName
+
   return (
     <div className="space-y-8">
       <div>
@@ -85,10 +98,89 @@ const WorkoutRecords: React.FC = () => {
         </div>
         
         <div className="relative z-10">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center mb-6">
-            <Activity className="h-6 w-6 mr-3 text-cyan-400 animate-pulse" />
-            所有锻炼记录
-          </h2>
+          {/* 标题和筛选按钮 */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center">
+              <Activity className="h-6 w-6 mr-3 text-cyan-400 animate-pulse" />
+              所有锻炼记录
+            </h2>
+            
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-xl text-cyan-300 hover:from-cyan-500/30 hover:to-purple-500/30 transition-all duration-300"
+            >
+              <Filter className="h-5 w-5" />
+              <span>筛选</span>
+              {hasFilters && (
+                <span className="flex items-center justify-center w-5 h-5 bg-cyan-500 text-white text-xs rounded-full">
+                  1
+                </span>
+              )}
+            </button>
+          </div>
+          
+          {/* 筛选条件 */}
+          {showFilters && (
+            <div className="bg-slate-800/50 rounded-xl p-4 mb-6 border border-cyan-500/20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 开始日期 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                    <Calendar className="h-4 w-4 mr-1.5 text-cyan-400" />
+                    开始日期
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+                
+                {/* 结束日期 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                    <Calendar className="h-4 w-4 mr-1.5 text-cyan-400" />
+                    结束日期
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+                
+                {/* 计划名称 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                    <Search className="h-4 w-4 mr-1.5 text-cyan-400" />
+                    计划名称
+                  </label>
+                  <input
+                    type="text"
+                    value={planName}
+                    onChange={(e) => setPlanName(e.target.value)}
+                    placeholder="输入计划名称..."
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-cyan-500/30 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+              </div>
+              
+              {/* 重置按钮 */}
+              {hasFilters && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={resetFilters}
+                    className="flex items-center space-x-2 px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-xl text-gray-300 hover:bg-slate-700 transition-all duration-300"
+                  >
+                    <X className="h-4 w-4" />
+                    <span>重置筛选</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           
           {isLoading ? (
             <div className="text-center py-8 text-gray-400">加载中...</div>

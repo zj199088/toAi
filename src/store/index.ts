@@ -435,7 +435,7 @@ interface WorkoutRecordState {
   error: string | null
   totalCountLastYear: number
   addRecord: (record: any) => Promise<void>
-  getRecords: (planId: string, limit?: number) => Promise<void>
+  getRecords: (planId?: string, limit?: number, startDate?: string, endDate?: string, planName?: string) => Promise<void>
   getTotalCountLastYear: () => Promise<void>
 }
 
@@ -485,12 +485,12 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
       })
     }
   },
-  getRecords: async (planId, limit) => {
+  getRecords: async (planId, limit, startDate, endDate, planName) => {
     if (!checkAuthAndRedirect(false)) {
       set({ records: [], isLoading: false })
       return
     }
-    console.log('🔄 开始获取锻炼记录，planId:', planId, 'limit:', limit)
+    console.log('🔄 开始获取锻炼记录，planId:', planId, 'limit:', limit, 'startDate:', startDate, 'endDate:', endDate, 'planName:', planName)
     set({ isLoading: true, error: null })
     try {
       // 获取当前用户
@@ -513,6 +513,35 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
       // 如果有planId，添加计划过滤
       if (planId) {
         query = query.eq('plan_id', planId)
+      }
+      
+      // 如果有startDate，添加开始日期过滤
+      if (startDate) {
+        query = query.gte('date', startDate)
+      }
+      
+      // 如果有endDate，添加结束日期过滤
+      if (endDate) {
+        query = query.lte('date', endDate)
+      }
+      
+      // 如果有planName，添加计划名称过滤
+      if (planName) {
+        // 先获取符合计划名称的计划ID
+        const { data: plans, error: planError } = await supabase
+          .from('fitness_plans')
+          .select('id')
+          .eq('user_id', user.id)
+          .ilike('name', `%${planName}%`)
+        
+        if (!planError && plans && plans.length > 0) {
+          const planIds = plans.map(p => p.id)
+          query = query.in('plan_id', planIds)
+        } else {
+          // 没有找到匹配的计划，返回空结果
+          set({ records: [], isLoading: false })
+          return
+        }
       }
       
       query = query.order('created_at', { ascending: false })
