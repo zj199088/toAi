@@ -19,18 +19,24 @@ const Login: React.FC = () => {
     } else {
       await signIn(email, password)
     }
-    navigate('/')
+    // 只有在没有错误且用户已登录时才导航
+    if (!error) {
+      navigate('/')
+    }
   }
 
-  const handleWechatLogin = () => {
+  const handleWechatLogin = async () => {
     // 模拟微信登录，实际项目中会跳转到微信授权页面
     const mockWechatInfo = {
       openid: 'mock_openid_123',
       nickname: '微信用户',
       avatarUrl: 'https://via.placeholder.com/150'
     }
-    signInWithWechat(mockWechatInfo)
-    navigate('/')
+    await signInWithWechat(mockWechatInfo)
+    // 只有在没有错误且用户已登录时才导航
+    if (!error) {
+      navigate('/')
+    }
   }
 
   return (
