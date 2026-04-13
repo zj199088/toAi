@@ -3,16 +3,19 @@ import { supabase } from '../lib/supabase'
 
 interface UserState {
   user: any | null
+  isAdmin: boolean
   isLoading: boolean
   error: string | null
   signUp: (email: string, password: string, name: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   checkAuth: () => Promise<void>
+  signInWithWechat: (wechatInfo: any) => Promise<void>
 }
 
 export const useUserStore = create<UserState>((set) => ({
   user: null,
+  isAdmin: false,
   isLoading: true,
   error: null,
   signUp: async (email, password, name) => {
@@ -48,17 +51,37 @@ export const useUserStore = create<UserState>((set) => ({
     if (error) {
       set({ error: error.message, isLoading: false })
     } else {
-      set({ user: null, isLoading: false })
+      set({ user: null, isAdmin: false, isLoading: false })
     }
   },
   checkAuth: async () => {
     set({ isLoading: true })
     const { data: { session } } = await supabase.auth.getSession()
     if (session) {
-      set({ user: session.user, isLoading: false })
+      // 这里可以根据用户邮箱或其他信息判断是否为管理员
+      const isAdmin = session.user.email?.includes('admin') || false
+      set({ user: session.user, isAdmin, isLoading: false })
     } else {
-      set({ user: null, isLoading: false })
+      set({ user: null, isAdmin: false, isLoading: false })
     }
+  },
+  signInWithWechat: async (wechatInfo) => {
+    set({ isLoading: true, error: null })
+    // 这里需要实现微信登录逻辑
+    // 实际项目中会使用微信开放平台的API
+    // 这里模拟登录成功
+    set({ 
+      user: {
+        id: 'wechat_' + wechatInfo.openid,
+        email: wechatInfo.openid + '@wechat.com',
+        user_metadata: {
+          name: wechatInfo.nickname,
+          avatar: wechatInfo.avatarUrl
+        }
+      },
+      isAdmin: false,
+      isLoading: false 
+    })
   }
 }))
 
