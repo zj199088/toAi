@@ -500,14 +500,22 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
         return
       }
 
-      // 从Supabase数据库获取锻炼记录
+      // 从Supabase数据库获取锻炼记录，包含计划名称
       console.log('📡 尝试从Supabase获取记录...')
       let query = supabase
         .from('workout_records')
-        .select('*')
-        .eq('plan_id', planId)
+        .select(`
+          *,
+          fitness_plans(name)
+        `)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+      
+      // 如果有planId，添加计划过滤
+      if (planId) {
+        query = query.eq('plan_id', planId)
+      }
+      
+      query = query.order('created_at', { ascending: false })
       
       // 如果有limit参数，添加限制
       if (limit) {

@@ -30,10 +30,10 @@ const Home: React.FC = () => {
   }, [getPlans, user])
 
   useEffect(() => {
-    if (user && currentPlan) {
-      getRecords(currentPlan.id, 3)
+    if (user) {
+      getRecords(undefined, 3)
     }
-  }, [currentPlan, getRecords, user])
+  }, [getRecords, user])
 
   useEffect(() => {
     if (user) {
@@ -215,13 +215,20 @@ const Home: React.FC = () => {
                       <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
                         <div className="flex justify-between items-start">
                           <div>
-                              <h4 className="text-xl font-bold text-white mb-2">
-                                {exerciseMap[record.exercise_id] || 
-                                 record.exercise_name || 
-                                 record.exercise || 
-                                 record.exercise_id?.replace('exercise_', '') || 
-                                 '未知锻炼'}
-                              </h4>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-xl font-bold text-white">
+                                  {exerciseMap[record.exercise_id] || 
+                                   record.exercise_name || 
+                                   record.exercise || 
+                                   record.exercise_id?.replace('exercise_', '') || 
+                                   '未知锻炼'}
+                                </h4>
+                                {record.fitness_plans?.name && (
+                                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full">
+                                    {record.fitness_plans.name}
+                                  </span>
+                                )}
+                              </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                               <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span></div>
                               <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span></div>
