@@ -13,6 +13,16 @@ import AdminUsers from './pages/admin/Users'
 import AdminTemplates from './pages/admin/Templates'
 import AdminStats from './pages/admin/Stats'
 
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUserStore()
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return <>{children}</>
+}
+
 export default function App() {
   const { isAdmin, isLoading, user } = useUserStore()
 
@@ -45,49 +55,67 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
-          <Layout>
-            <Home />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/plan/generate" element={
-          <Layout>
-            <PlanGenerate />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <PlanGenerate />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/plan/templates" element={
-          <Layout>
-            <PlanTemplates />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <PlanTemplates />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/track" element={
-          <Layout>
-            <Track />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Track />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/diet" element={
-          <Layout>
-            <Diet />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Diet />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/records" element={
-          <Layout>
-            <WorkoutRecords />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <WorkoutRecords />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/admin/users" element={
-          <Layout>
-            <AdminUsers />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <AdminUsers />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/admin/templates" element={
-          <Layout>
-            <AdminTemplates />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <AdminTemplates />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/admin/stats" element={
-          <Layout>
-            <AdminStats />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <AdminStats />
+            </Layout>
+          </ProtectedRoute>
         } />
       </Routes>
     </Router>
