@@ -16,25 +16,25 @@ const PlanTemplates: React.FC = () => {
       id: 'beginner',
       name: '基础健身模板',
       description: '适合健身新手，包含基础动作和循序渐进的训练计划',
-      image: 'https://via.placeholder.com/400x200?text=基础健身'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20beginner%20workout%20blue%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: 'fat-loss',
       name: '减脂专项模板',
       description: '专注于减脂，结合有氧运动和力量训练',
-      image: 'https://via.placeholder.com/400x200?text=减脂专项'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20fat%20loss%20workout%20green%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: 'muscle-gain',
       name: '增肌强化模板',
       description: '针对增肌目标，包含大重量训练和营养建议',
-      image: 'https://via.placeholder.com/400x200?text=增肌强化'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20muscle%20gain%20workout%20purple%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: 'body-shaping',
       name: '全身塑形模板',
       description: '塑造全身线条，提升整体体态',
-      image: 'https://via.placeholder.com/400x200?text=全身塑形'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20body%20shaping%20workout%20orange%20cyberpunk%20style&image_size=landscape_16_9'
     }
   ]
 

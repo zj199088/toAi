@@ -14,7 +14,7 @@ const Templates: React.FC = () => {
       goal: '综合提升',
       duration: '4周',
       createdAt: '2026-04-01',
-      image: 'https://via.placeholder.com/200x100?text=基础健身'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20beginner%20workout%20blue%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: '2',
@@ -23,7 +23,7 @@ const Templates: React.FC = () => {
       goal: '减脂',
       duration: '8周',
       createdAt: '2026-04-02',
-      image: 'https://via.placeholder.com/200x100?text=减脂专项'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20fat%20loss%20workout%20green%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: '3',
@@ -32,7 +32,7 @@ const Templates: React.FC = () => {
       goal: '增肌',
       duration: '12周',
       createdAt: '2026-04-03',
-      image: 'https://via.placeholder.com/200x100?text=增肌强化'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20muscle%20gain%20workout%20purple%20cyberpunk%20style&image_size=landscape_16_9'
     },
     {
       id: '4',
@@ -41,7 +41,7 @@ const Templates: React.FC = () => {
       goal: '塑形',
       duration: '6周',
       createdAt: '2026-04-04',
-      image: 'https://via.placeholder.com/200x100?text=全身塑形'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20body%20shaping%20workout%20orange%20cyberpunk%20style&image_size=landscape_16_9'
     }
   ]
 
