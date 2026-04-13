@@ -235,7 +235,6 @@ const Track: React.FC = () => {
         plan_id: currentPlan.id,
         schedule_id: 'schedule123',
         exercise_id: generateUUID(),
-        exercise_name: exerciseName,
         date: selectedDay.toISOString().split('T')[0],
         sets_completed: 3,
         reps_completed: 15,
