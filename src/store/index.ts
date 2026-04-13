@@ -348,7 +348,17 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
           console.log(`✅ 成功创建训练日程 (第${day}天, 第${Math.ceil(day/7)}周):`, schedule)
 
           // 创建训练动作
-          const exercises = getExercisesByGoal(plan.goal, dayOfWeek)
+          let exercises = []
+          if (plan.exercises && plan.exercises.length > 0) {
+            // 使用自定义运动项目
+            exercises = plan.exercises
+            console.log(`📋 使用自定义运动项目，共${exercises.length}个`)
+          } else {
+            // 使用根据目标生成的运动项目
+            exercises = getExercisesByGoal(plan.goal, dayOfWeek)
+            console.log(`🎯 使用根据目标生成的运动项目，共${exercises.length}个`)
+          }
+          
           for (const exercise of exercises) {
             const { error: exerciseError } = await supabase
               .from('workout_exercises')
