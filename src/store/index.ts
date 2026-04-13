@@ -106,20 +106,20 @@ export const useUserStore = create<UserState>((set) => ({
       set({ isLoading: true, error: null })
       
       // 首先尝试从Supabase获取当前用户会话
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const { data, error: authError } = await supabase.auth.getUser()
       
-      if (user) {
+      if (data?.user) {
         // 从Supabase获取到用户信息
         const userData = {
-          id: user.id,
-          email: user.email,
+          id: data.user.id,
+          email: data.user.email,
           user_metadata: {
-            name: user.user_metadata?.name || user.email?.split('@')[0],
-            displayName: user.user_metadata?.displayName || user.user_metadata?.name || user.email?.split('@')[0],
-            ...user.user_metadata
+            name: data.user.user_metadata?.name || data.user.email?.split('@')[0],
+            displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0],
+            ...data.user.user_metadata
           }
         }
-        const isAdmin = user.email?.includes('admin') || false
+        const isAdmin = data.user.email?.includes('admin') || false
         
         // 更新localStorage
         localStorage.setItem('user', JSON.stringify(userData))

@@ -13,11 +13,7 @@ import AdminTemplates from './pages/admin/Templates'
 import AdminStats from './pages/admin/Stats'
 
 export default function App() {
-  const { checkAuth, isAdmin, isLoading } = useUserStore()
-
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
+  const { isAdmin, isLoading } = useUserStore()
 
   if (isLoading) {
     return (
