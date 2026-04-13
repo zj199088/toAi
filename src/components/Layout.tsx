@@ -5,7 +5,7 @@ import { cn } from '../utils/cn'
 import { Menu, X, User } from 'lucide-react'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, checkAuth, signOut } = useUserStore()
+  const { user, isAdmin, checkAuth, signOut } = useUserStore()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
@@ -19,6 +19,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: '模板选择', path: '/plan/templates' },
     { name: '锻炼跟踪', path: '/track' },
     { name: '饮食计划', path: '/diet' }
+  ]
+
+  const adminNavItems = [
+    { name: '用户管理', path: '/admin/users' },
+    { name: '模板管理', path: '/admin/templates' },
+    { name: '数据统计', path: '/admin/stats' }
   ]
 
   return (
@@ -44,8 +50,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {item.name}
               </Link>
             ))}
+            {isAdmin && (
+              <div className="relative group">
+                <button className="font-medium text-gray-700 hover:text-blue-600 flex items-center space-x-1">
+                  <span>管理</span>
+                  <span className="text-xs">▼</span>
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50 hidden group-hover:block">
+                  {adminNavItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             {user ? (
               <div className="flex items-center space-x-4">
+                {user.user_metadata?.avatar ? (
+                  <img 
+                    src={user.user_metadata.avatar} 
+                    alt="用户头像" 
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <User size={20} className="text-gray-700" />
+                )}
                 <span className="text-gray-700">{user.user_metadata?.name || user.email}</span>
                 <button
                   onClick={signOut}
@@ -90,10 +124,33 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   {item.name}
                 </Link>
               ))}
+              {isAdmin && (
+                <div className="pt-2 border-t">
+                  <p className="text-sm font-medium text-gray-500 mb-2">管理选项</p>
+                  {adminNavItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="block py-2 text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
               {user ? (
                 <div className="flex flex-col space-y-2 pt-4 border-t">
-                  <div className="flex items-center space-x-2">
-                    <User size={18} />
+                  <div className="flex items-center space-x-3">
+                    {user.user_metadata?.avatar ? (
+                      <img 
+                        src={user.user_metadata.avatar} 
+                        alt="用户头像" 
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User size={18} />
+                    )}
                     <span className="text-gray-700">{user.user_metadata?.name || user.email}</span>
                   </div>
                   <button
