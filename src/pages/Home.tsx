@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useUserStore, useFitnessPlanStore, useWorkoutRecordStore } from '../store'
+import { supabase } from '../lib/supabase'
 import { Link } from 'react-router-dom'
 import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer } from 'lucide-react'
 
@@ -7,12 +8,43 @@ const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
   const { currentPlan } = useFitnessPlanStore()
   const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
+  const [exerciseMap, setExerciseMap] = useState<Record<string, string>>({})
+  const [loadingExercises, setLoadingExercises] = useState(true)
 
   useEffect(() => {
     if (currentPlan) {
       getRecords(currentPlan.id)
     }
   }, [currentPlan, getRecords])
+
+  useEffect(() => {
+    // 获取所有锻炼动作，构建映射表
+    const fetchExercises = async () => {
+      setLoadingExercises(true)
+      try {
+        const { data: exercises, error } = await supabase
+          .from('workout_exercises')
+          .select('id, name')
+
+        if (error) {
+          console.error('获取锻炼动作失败:', error)
+        } else if (exercises) {
+          const map: Record<string, string> = {}
+          exercises.forEach(exercise => {
+            map[exercise.id] = exercise.name
+          })
+          setExerciseMap(map)
+          console.log('✅ 成功构建锻炼动作映射表:', map)
+        }
+      } catch (error) {
+        console.error('获取锻炼动作失败:', error)
+      } finally {
+        setLoadingExercises(false)
+      }
+    }
+
+    fetchExercises()
+  }, [])
 
   const features = [
     {
@@ -149,7 +181,8 @@ const Home: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                               <h4 className="text-xl font-bold text-white mb-2">
-                                {record.exercise_name || 
+                                {exerciseMap[record.exercise_id] || 
+                                 record.exercise_name || 
                                  record.exercise || 
                                  record.exercise_id?.replace('exercise_', '') || 
                                  '未知锻炼'}
