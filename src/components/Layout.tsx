@@ -11,7 +11,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     checkAuth()
-  }, [checkAuth])
+  }, [])
   const navItems = [
     { name: '首页', path: '/' },
     { name: '生成计划', path: '/plan/generate' },
