@@ -103,36 +103,45 @@ export const useUserStore = create<UserState>((set) => ({
   checkAuth: async () => {
     try {
       set({ isLoading: true })
-      // 实际从Supabase检查认证状态
-      const { data: { session } } = await supabase.auth.getSession()
       
-      if (session?.user) {
+      // 先尝试从localStorage获取用户信息
+      const storedUser = localStorage.getItem('user')
+      const storedIsAdmin = localStorage.getItem('isAdmin')
+      
+      if (storedUser) {
+        set({ 
+          user: JSON.parse(storedUser), 
+          isAdmin: storedIsAdmin === 'true', 
+          isLoading: false 
+        })
+        return
+      }
+      
+      // 然后尝试从Supabase获取用户信息
+      const { data, error } = await supabase.auth.getUser()
+      
+      if (error) {
+        console.error('从Supabase获取用户信息失败:', error)
+        set({ user: null, isAdmin: false, isLoading: false })
+        return
+      }
+      
+      if (data.user) {
         const user = {
-          id: session.user.id,
-          email: session.user.email || '',
+          id: data.user.id,
+          email: data.user.email || '',
           user_metadata: {
-            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
-            displayName: session.user.user_metadata?.displayName || session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
-            ...session.user.user_metadata
+            name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
+            displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
+            ...data.user.user_metadata
           }
         }
-        const isAdmin = session.user.email?.includes('admin') || false
+        const isAdmin = data.user.email?.includes('admin') || false
         localStorage.setItem('user', JSON.stringify(user))
         localStorage.setItem('isAdmin', isAdmin.toString())
         set({ user, isAdmin, isLoading: false })
       } else {
-        // 从localStorage恢复用户信息
-        const storedUser = localStorage.getItem('user')
-        const storedIsAdmin = localStorage.getItem('isAdmin')
-        if (storedUser) {
-          set({ 
-            user: JSON.parse(storedUser), 
-            isAdmin: storedIsAdmin === 'true', 
-            isLoading: false 
-          })
-        } else {
-          set({ user: null, isAdmin: false, isLoading: false })
-        }
+        set({ user: null, isAdmin: false, isLoading: false })
       }
     } catch (error) {
       console.error('认证检查失败:', error)
