@@ -101,9 +101,10 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
   checkAuth: async () => {
+    // 立即设置加载状态
+    set({ isLoading: true, error: null })
+    
     try {
-      set({ isLoading: true, error: null })
-      
       // 先尝试从localStorage获取用户信息
       const storedUser = localStorage.getItem('user')
       const storedIsAdmin = localStorage.getItem('isAdmin')
@@ -118,11 +119,50 @@ export const useUserStore = create<UserState>((set) => ({
         return
       }
       
-      // 然后尝试从Supabase获取用户信息
-      const { data, error } = await supabase.auth.getUser()
-      
-      if (error) {
-        console.error('从Supabase获取用户信息失败:', error)
+      // 直接尝试从Supabase获取用户信息，使用try-catch处理错误
+      try {
+        const { data, error: supabaseError } = await supabase.auth.getUser()
+        
+        if (supabaseError) {
+          console.error('从Supabase获取用户信息失败:', supabaseError)
+          set({ 
+            user: null, 
+            isAdmin: false, 
+            isLoading: false, 
+            error: '连接服务器失败，请稍后重试'
+          })
+          return
+        }
+        
+        if (data.user) {
+          const user = {
+            id: data.user.id,
+            email: data.user.email || '',
+            user_metadata: {
+              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
+              displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
+              ...data.user.user_metadata
+            }
+          }
+          const isAdmin = data.user.email?.includes('admin') || false
+          localStorage.setItem('user', JSON.stringify(user))
+          localStorage.setItem('isAdmin', isAdmin.toString())
+          set({ 
+            user, 
+            isAdmin, 
+            isLoading: false, 
+            error: null
+          })
+        } else {
+          set({ 
+            user: null, 
+            isAdmin: false, 
+            isLoading: false, 
+            error: null
+          })
+        }
+      } catch (supabaseError) {
+        console.error('从Supabase获取用户信息失败:', supabaseError)
         set({ 
           user: null, 
           isAdmin: false, 
@@ -130,34 +170,6 @@ export const useUserStore = create<UserState>((set) => ({
           error: '连接服务器失败，请稍后重试'
         })
         return
-      }
-      
-      if (data.user) {
-        const user = {
-          id: data.user.id,
-          email: data.user.email || '',
-          user_metadata: {
-            name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
-            displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
-            ...data.user.user_metadata
-          }
-        }
-        const isAdmin = data.user.email?.includes('admin') || false
-        localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('isAdmin', isAdmin.toString())
-        set({ 
-          user, 
-          isAdmin, 
-          isLoading: false, 
-          error: null
-        })
-      } else {
-        set({ 
-          user: null, 
-          isAdmin: false, 
-          isLoading: false, 
-          error: null
-        })
       }
     } catch (error) {
       console.error('认证检查失败:', error)
