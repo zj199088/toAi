@@ -1,45 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useUserStore, useFitnessPlanStore, useWorkoutRecordStore } from '../store'
 import { Link } from 'react-router-dom'
-import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer, Plus, Trash2, Edit } from 'lucide-react'
+import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer } from 'lucide-react'
 
 const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
   const { currentPlan } = useFitnessPlanStore()
-  const { records, isLoading, error, addRecord, getRecords } = useWorkoutRecordStore()
-  const [newRecord, setNewRecord] = useState({
-    exercise: '',
-    sets: 0,
-    reps: 0,
-    weight: 0,
-    duration: 0
-  })
+  const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
 
   useEffect(() => {
     if (currentPlan) {
       getRecords(currentPlan.id)
     }
   }, [currentPlan, getRecords])
-
-  const handleAddRecord = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!currentPlan || !newRecord.exercise) return
-
-    await addRecord({
-      ...newRecord,
-      plan_id: currentPlan.id,
-      user_id: user?.id || 'anonymous',
-      date: new Date().toISOString()
-    })
-
-    setNewRecord({
-      exercise: '',
-      sets: 0,
-      reps: 0,
-      weight: 0,
-      duration: 0
-    })
-  }
 
   const features = [
     {
@@ -160,75 +133,6 @@ const Home: React.FC = () => {
                 锻炼记录
               </h2>
               
-              {/* 添加记录表单 */}
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 rounded-xl border border-cyan-500/20 shadow-xl mb-8">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                  <Plus className="h-5 w-5 mr-2 text-cyan-400" />
-                  添加锻炼记录
-                </h3>
-                <form onSubmit={handleAddRecord} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">锻炼项目</label>
-                    <input
-                      type="text"
-                      value={newRecord.exercise}
-                      onChange={(e) => setNewRecord({ ...newRecord, exercise: e.target.value })}
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      placeholder="例如：俯卧撑"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">组数</label>
-                    <input
-                      type="number"
-                      value={newRecord.sets}
-                      onChange={(e) => setNewRecord({ ...newRecord, sets: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">次数</label>
-                    <input
-                      type="number"
-                      value={newRecord.reps}
-                      onChange={(e) => setNewRecord({ ...newRecord, reps: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">重量 (kg)</label>
-                    <input
-                      type="number"
-                      value={newRecord.weight}
-                      onChange={(e) => setNewRecord({ ...newRecord, weight: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      min="0"
-                      step="0.5"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">时长 (分钟)</label>
-                    <input
-                      type="number"
-                      value={newRecord.duration}
-                      onChange={(e) => setNewRecord({ ...newRecord, duration: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      min="0"
-                    />
-                  </div>
-                  <div className="md:col-span-2 lg:col-span-1 flex items-end">
-                    <button
-                      type="submit"
-                      className="w-full px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-cyan-500/40"
-                    >
-                      保存记录
-                    </button>
-                  </div>
-                </form>
-              </div>
-              
               {/* 记录列表 */}
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4">最近记录</h3>
@@ -244,12 +148,12 @@ const Home: React.FC = () => {
                       <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="text-xl font-bold text-white mb-2">{record.exercise}</h4>
+                            <h4 className="text-xl font-bold text-white mb-2">{record.exercise || record.exercise_id?.replace('exercise_', '') || '未知锻炼'}</h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                              <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets}</span></div>
-                              <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps}</span></div>
-                              <div className="text-gray-300">重量: <span className="text-cyan-400 font-medium">{record.weight} kg</span></div>
-                              <div className="text-gray-300">时长: <span className="text-cyan-400 font-medium">{record.duration} 分钟</span></div>
+                              <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span></div>
+                              <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span></div>
+                              <div className="text-gray-300">重量: <span className="text-cyan-400 font-medium">{record.weight || 0} kg</span></div>
+                              <div className="text-gray-300">时长: <span className="text-cyan-400 font-medium">{record.duration || 0} 分钟</span></div>
                             </div>
                           </div>
                           <div className="text-sm text-gray-400">
@@ -260,6 +164,16 @@ const Home: React.FC = () => {
                     ))}
                   </div>
                 )}
+              </div>
+              
+              <div className="mt-6">
+                <Link
+                  to="/track"
+                  className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center transition-colors duration-300 group"
+                >
+                  查看完整锻炼记录
+                  <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
             </div>
           </section>
