@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useFitnessPlanStore, useWorkoutRecordStore, useBodyMeasurementStore, useUserStore } from '../store'
 import { cn } from '../utils/cn'
 import { Check, Calendar, BarChart3, Activity, ChevronRight, Plus, Edit } from 'lucide-react'
 
 const Track: React.FC = () => {
-  const { currentPlan } = useFitnessPlanStore()
-  const { addRecord, records } = useWorkoutRecordStore()
-  const { addMeasurement, measurements } = useBodyMeasurementStore()
+  const { currentPlan, getPlans, setCurrentPlan } = useFitnessPlanStore()
+  const { addRecord, records, getRecords } = useWorkoutRecordStore()
+  const { addMeasurement, measurements, getMeasurements } = useBodyMeasurementStore()
   const { user } = useUserStore()
   const [selectedDay, setSelectedDay] = useState(new Date())
   const [showBodyMeasurementForm, setShowBodyMeasurementForm] = useState(false)
@@ -18,6 +18,32 @@ const Track: React.FC = () => {
     arm: '',
     leg: ''
   })
+
+  // 组件加载时获取数据
+  useEffect(() => {
+    const loadData = async () => {
+      if (user) {
+        // 获取用户的健身计划
+        await getPlans()
+        // 这里可以根据需要设置当前计划，例如获取最新的计划
+        // 假设有计划列表，我们取最新的一个
+        const plans = useFitnessPlanStore.getState().plans
+        if (plans.length > 0) {
+          // 按创建时间排序，取最新的
+          const latestPlan = plans.sort((a, b) => {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          })[0]
+          setCurrentPlan(latestPlan)
+          // 获取该计划的锻炼记录
+          await getRecords(latestPlan.id)
+        }
+        // 获取用户的身体数据
+        await getMeasurements()
+      }
+    }
+
+    loadData()
+  }, [user, getPlans, setCurrentPlan, getRecords, getMeasurements])
 
   // 模拟训练计划数据
   const workoutSchedule = [

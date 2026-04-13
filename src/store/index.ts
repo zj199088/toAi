@@ -118,9 +118,16 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
   },
   getPlans: async () => {
     set({ isLoading: true, error: null })
+    // 获取当前用户ID
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      set({ plans: [], isLoading: false })
+      return
+    }
     const { data, error } = await supabase
       .from('fitness_plans')
       .select('*')
+      .eq('user_id', session.user.id)
     if (error) {
       set({ error: error.message, isLoading: false })
     } else {
@@ -202,9 +209,16 @@ export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
   },
   getMeasurements: async () => {
     set({ isLoading: true, error: null })
+    // 获取当前用户ID
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      set({ measurements: [], isLoading: false })
+      return
+    }
     const { data, error } = await supabase
       .from('body_measurements')
       .select('*')
+      .eq('user_id', session.user.id)
     if (error) {
       set({ error: error.message, isLoading: false })
     } else {
