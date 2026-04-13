@@ -184,6 +184,12 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
   createPlan: async (plan) => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        throw new Error('用户未登录')
+      }
+
       // 生成 UUID
       const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -197,6 +203,7 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
         .from('fitness_plans')
         .insert({
           ...plan,
+          user_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
@@ -275,6 +282,7 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
             .insert({
               id: generateUUID(),
               plan_id: fitnessPlan.id,
+              user_id: user.id,
               day: day,
               workout_type: workoutType,
               description: `${workoutType}训练 (第${Math.ceil(day/7)}周)`,
@@ -298,6 +306,7 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
               .insert({
                 id: generateUUID(),
                 schedule_id: schedule.id,
+                user_id: user.id,
                 name: exercise.name,
                 sets: exercise.sets,
                 reps: exercise.reps,
@@ -326,10 +335,18 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
   getPlans: async () => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ plans: [], currentPlan: null, isLoading: false })
+        return
+      }
+
       // 从Supabase数据库获取健身计划
       const { data, error } = await supabase
         .from('fitness_plans')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -340,6 +357,8 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
       // 设置最新的计划为当前计划
       if (data && data.length > 0) {
         set({ currentPlan: data[0] })
+      } else {
+        set({ currentPlan: null })
       }
     } catch (error) {
       console.error('获取健身计划失败:', error)
@@ -367,12 +386,19 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
     console.log('🔄 开始添加锻炼记录，数据:', record)
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        throw new Error('用户未登录')
+      }
+
       // 保存到Supabase数据库
       console.log('📡 尝试保存到Supabase数据库...')
       const { data, error } = await supabase
         .from('workout_records')
         .insert({
           ...record,
+          user_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
@@ -400,12 +426,20 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
     console.log('🔄 开始获取锻炼记录，planId:', planId)
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ records: [], isLoading: false })
+        return
+      }
+
       // 从Supabase数据库获取锻炼记录
       console.log('📡 尝试从Supabase获取记录...')
       const { data, error } = await supabase
         .from('workout_records')
         .select('*')
         .eq('plan_id', planId)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -442,11 +476,18 @@ export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
   addMeasurement: async (measurement) => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        throw new Error('用户未登录')
+      }
+
       // 保存到Supabase数据库
       const { data, error } = await supabase
         .from('body_measurements')
         .insert({
           ...measurement,
+          user_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
@@ -467,10 +508,18 @@ export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
   getMeasurements: async () => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ measurements: [], isLoading: false })
+        return
+      }
+
       // 从Supabase数据库获取身体数据
       const { data, error } = await supabase
         .from('body_measurements')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -544,11 +593,18 @@ export const useDietPlanStore = create<DietPlanState>((set) => ({
   createPlan: async (plan) => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        throw new Error('用户未登录')
+      }
+
       // 保存到Supabase数据库
       const { data, error } = await supabase
         .from('diet_plans')
         .insert({
           ...plan,
+          user_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
@@ -570,10 +626,18 @@ export const useDietPlanStore = create<DietPlanState>((set) => ({
   getPlans: async () => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ plans: [], currentPlan: null, isLoading: false })
+        return
+      }
+
       // 从Supabase数据库获取饮食计划
       const { data, error } = await supabase
         .from('diet_plans')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -584,6 +648,8 @@ export const useDietPlanStore = create<DietPlanState>((set) => ({
       // 设置最新的计划为当前计划
       if (data && data.length > 0) {
         set({ currentPlan: data[0] })
+      } else {
+        set({ currentPlan: null })
       }
     } catch (error) {
       console.error('获取饮食计划失败:', error)
@@ -607,11 +673,18 @@ export const useDietRecordStore = create<DietRecordState>((set) => ({
   addRecord: async (record) => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        throw new Error('用户未登录')
+      }
+
       // 保存到Supabase数据库
       const { data, error } = await supabase
         .from('diet_records')
         .insert({
           ...record,
+          user_id: user.id,
           created_at: new Date().toISOString()
         })
         .select()
@@ -632,10 +705,18 @@ export const useDietRecordStore = create<DietRecordState>((set) => ({
   getRecords: async () => {
     set({ isLoading: true, error: null })
     try {
+      // 获取当前用户
+      const user = useUserStore.getState().user
+      if (!user) {
+        set({ records: [], isLoading: false })
+        return
+      }
+
       // 从Supabase数据库获取饮食记录
       const { data, error } = await supabase
         .from('diet_records')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
