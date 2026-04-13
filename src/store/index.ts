@@ -26,7 +26,8 @@ export const useUserStore = create<UserState>((set) => ({
         id: 'user_' + Date.now(),
         email: email,
         user_metadata: {
-          name: name
+          name: name,
+          displayName: name
         }
       }
       const isAdmin = email.includes('admin') || false
@@ -42,11 +43,13 @@ export const useUserStore = create<UserState>((set) => ({
     set({ isLoading: true, error: null })
     try {
       // 模拟登录成功，保存用户信息到localStorage
+      const displayName = email.split('@')[0]
       const user = {
         id: 'user_' + Date.now(),
         email: email,
         user_metadata: {
-          name: email.split('@')[0]
+          name: displayName,
+          displayName: displayName
         }
       }
       const isAdmin = email.includes('admin') || false
@@ -101,6 +104,7 @@ export const useUserStore = create<UserState>((set) => ({
         email: wechatInfo.openid + '@wechat.com',
         user_metadata: {
           name: wechatInfo.nickname,
+          displayName: wechatInfo.nickname,
           avatar: wechatInfo.avatarUrl
         }
       }
