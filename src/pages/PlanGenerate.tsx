@@ -28,8 +28,8 @@ const PlanGenerate: React.FC = () => {
     // 模拟体检报告分析过程
     setTimeout(async () => {
       const startDate = new Date()
-      const endDate = new Date()
-      endDate.setWeek(startDate.getWeek() + formData.duration)
+    const endDate = new Date()
+    endDate.setDate(startDate.getDate() + formData.duration * 7)
 
       const plan = {
         name: formData.name || `${formData.goal}计划`,

@@ -47,7 +47,7 @@ const PlanTemplates: React.FC = () => {
 
     const startDate = new Date()
     const endDate = new Date()
-    endDate.setWeek(startDate.getWeek() + duration)
+    endDate.setDate(startDate.getDate() + duration * 7)
 
     const plan = {
       name: `${templates.find(t => t.id === selectedTemplate)?.name || '健身计划'}`,
