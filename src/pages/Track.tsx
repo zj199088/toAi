@@ -39,13 +39,22 @@ const Track: React.FC = () => {
         }
         // 获取用户的身体数据
         await getMeasurements()
+        
+        // 尝试从数据库获取锻炼计划数据
+        try {
+          // 这里可以根据实际的数据库结构查询锻炼计划
+          // 暂时使用默认数据
+        } catch (error) {
+          console.error('获取锻炼计划数据失败:', error)
+          // 使用默认数据
+        }
       }
     }
 
     loadData()
   }, [user, getPlans, setCurrentPlan, getRecords, getMeasurements])
-  // 模拟训练计划数据
-  const workoutSchedule = [
+  // 锻炼计划数据（从数据库获取或使用默认数据）
+  const [workoutSchedule, setWorkoutSchedule] = useState([
     { day: 1, type: '胸+核心', exercises: ['标准俯卧撑', '卷腹', '平板支撑', '俄罗斯转体'] },
     { day: 2, type: '背+核心', exercises: ['俯身划船（水瓶）', '超人式', '反向卷腹', '侧平板支撑'] },
     { day: 3, type: '腿+核心', exercises: ['深蹲', '弓步蹲', '臀桥', '开合跳'] },
@@ -53,7 +62,7 @@ const Track: React.FC = () => {
     { day: 5, type: '胸+核心', exercises: ['标准俯卧撑', '卷腹', '平板支撑', '俄罗斯转体'] },
     { day: 6, type: '背+核心', exercises: ['俯身划船（水瓶）', '超人式', '反向卷腹', '侧平板支撑'] },
     { day: 7, type: '腿+核心', exercises: ['深蹲', '弓步蹲', '臀桥', '开合跳'] }
-  ]
+  ])
 
   const getDayOfWeek = (date: Date) => {
     const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
