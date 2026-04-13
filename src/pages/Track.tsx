@@ -67,27 +67,51 @@ const Track: React.FC = () => {
 
   // 状态管理：存储每个练习的组完成情况
   const [exerciseSets, setExerciseSets] = useState<Record<string, boolean[]>>({})
+  // 状态管理：存储每个练习的最后完成组索引
+  const [lastCompletedSetIndex, setLastCompletedSetIndex] = useState<Record<string, number>>({})
 
   // 初始化练习的组状态
   useEffect(() => {
     const workout = getCurrentWorkout()
     if (workout) {
       const initialSets: Record<string, boolean[]> = {}
+      const initialLastSetIndex: Record<string, number> = {}
       workout.exercises.forEach((exercise) => {
         // 默认为3组，每组初始状态为未完成
         initialSets[exercise] = [false, false, false]
+        initialLastSetIndex[exercise] = -1
       })
       setExerciseSets(initialSets)
+      setLastCompletedSetIndex(initialLastSetIndex)
     }
   }, [selectedDay])
 
   // 切换组的完成状态
   const toggleSetComplete = (exercise: string, setIndex: number) => {
+    const lastSetIndex = lastCompletedSetIndex[exercise] ?? -1
+    
     setExerciseSets(prev => {
       const updatedSets = { ...prev }
       if (updatedSets[exercise]) {
         updatedSets[exercise] = [...updatedSets[exercise]]
-        updatedSets[exercise][setIndex] = !updatedSets[exercise][setIndex]
+        
+        // 如果点击的是第1组（索引0），并且最后完成组索引是-1或0，则可以切换
+        if (setIndex === 0 && (lastSetIndex === -1 || lastSetIndex === 0)) {
+          updatedSets[exercise][setIndex] = !updatedSets[exercise][setIndex]
+          // 更新最后完成组索引
+          setLastCompletedSetIndex(prevLast => ({
+            ...prevLast,
+            [exercise]: updatedSets[exercise][setIndex] ? 0 : -1
+          }))
+        } 
+        // 如果点击的是比最后完成组索引大1的组，则可以标记为完成
+        else if (setIndex === lastSetIndex + 1) {
+          updatedSets[exercise][setIndex] = true
+          setLastCompletedSetIndex(prevLast => ({
+            ...prevLast,
+            [exercise]: setIndex
+          }))
+        }
       }
       return updatedSets
     })
@@ -116,6 +140,17 @@ const Track: React.FC = () => {
         created_at: new Date().toISOString()
       })
     }
+  }
+
+  // 检查组是否可以点击
+  const isSetClickable = (exercise: string, setIndex: number) => {
+    const lastSetIndex = lastCompletedSetIndex[exercise] ?? -1
+    // 第1组（索引0）可以在最后完成组索引是-1或0时点击
+    if (setIndex === 0) {
+      return lastSetIndex === -1 || lastSetIndex === 0
+    }
+    // 其他组只能在最后完成组索引是当前组索引减1时点击
+    return setIndex === lastSetIndex + 1
   }
 
   const handleBodyMeasurementSubmit = (e: React.FormEvent) => {
@@ -217,14 +252,18 @@ const Track: React.FC = () => {
                               </button>
                             </div>
                             <div className="flex space-x-2">
-                              {sets.map((setComplete, setIndex) => (
+                              {sets.map((setComplete, setIndex) => {
+                                const clickable = isSetClickable(exercise, setIndex)
+                                return (
                                 <button
                                   key={setIndex}
                                   onClick={() => toggleSetComplete(exercise, setIndex)}
-                                  disabled={isCompleted}
+                                  disabled={isCompleted || !clickable}
                                   className={cn(
                                     'flex-1 py-2 rounded-md transition-colors text-center',
-                                    setComplete
+                                    isCompleted || !clickable
+                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                                      : setComplete
                                       ? 'bg-green-100 text-green-700 border border-green-200'
                                       : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                   )}
@@ -232,7 +271,7 @@ const Track: React.FC = () => {
                                   第 {setIndex + 1} 组
                                   {setComplete && <Check size={14} className="inline ml-1" />}
                                 </button>
-                              ))}
+                              )})}
                             </div>
                           </div>
                         )
