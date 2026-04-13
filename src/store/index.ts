@@ -412,7 +412,7 @@ interface WorkoutRecordState {
   isLoading: boolean
   error: string | null
   addRecord: (record: any) => Promise<void>
-  getRecords: (planId: string) => Promise<void>
+  getRecords: (planId: string, limit?: number) => Promise<void>
 }
 
 export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
@@ -459,8 +459,8 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
       })
     }
   },
-  getRecords: async (planId) => {
-    console.log('🔄 开始获取锻炼记录，planId:', planId)
+  getRecords: async (planId, limit) => {
+    console.log('🔄 开始获取锻炼记录，planId:', planId, 'limit:', limit)
     set({ isLoading: true, error: null })
     try {
       // 获取当前用户
@@ -472,12 +472,19 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
 
       // 从Supabase数据库获取锻炼记录
       console.log('📡 尝试从Supabase获取记录...')
-      const { data, error } = await supabase
+      let query = supabase
         .from('workout_records')
         .select('*')
         .eq('plan_id', planId)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+      
+      // 如果有limit参数，添加限制
+      if (limit) {
+        query = query.limit(limit)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         console.error('❌ Supabase错误:', error)

@@ -30,7 +30,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (currentPlan) {
-      getRecords(currentPlan.id)
+      getRecords(currentPlan.id, 3)
     }
   }, [currentPlan, getRecords])
 
