@@ -56,12 +56,17 @@ export const useUserStore = create<UserState>((set) => ({
   },
   checkAuth: async () => {
     set({ isLoading: true })
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      // 这里可以根据用户邮箱或其他信息判断是否为管理员
-      const isAdmin = session.user.email?.includes('admin') || false
-      set({ user: session.user, isAdmin, isLoading: false })
-    } else {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        // 这里可以根据用户邮箱或其他信息判断是否为管理员
+        const isAdmin = session.user.email?.includes('admin') || false
+        set({ user: session.user, isAdmin, isLoading: false })
+      } else {
+        set({ user: null, isAdmin: false, isLoading: false })
+      }
+    } catch (error) {
+      console.error('认证检查失败:', error)
       set({ user: null, isAdmin: false, isLoading: false })
     }
   },
