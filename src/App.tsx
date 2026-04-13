@@ -45,85 +45,49 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
-          user ? (
-            <Layout>
-              <Home />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <Home />
+          </Layout>
         } />
         <Route path="/plan/generate" element={
-          user ? (
-            <Layout>
-              <PlanGenerate />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <PlanGenerate />
+          </Layout>
         } />
         <Route path="/plan/templates" element={
-          user ? (
-            <Layout>
-              <PlanTemplates />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <PlanTemplates />
+          </Layout>
         } />
         <Route path="/track" element={
-          user ? (
-            <Layout>
-              <Track />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <Track />
+          </Layout>
         } />
         <Route path="/diet" element={
-          user ? (
-            <Layout>
-              <Diet />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <Diet />
+          </Layout>
         } />
         <Route path="/records" element={
-          user ? (
-            <Layout>
-              <WorkoutRecords />
-            </Layout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          <Layout>
+            <WorkoutRecords />
+          </Layout>
         } />
         <Route path="/admin/users" element={
-          isAdmin ? (
-            <Layout>
-              <AdminUsers />
-            </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <Layout>
+            <AdminUsers />
+          </Layout>
         } />
         <Route path="/admin/templates" element={
-          isAdmin ? (
-            <Layout>
-              <AdminTemplates />
-            </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <Layout>
+            <AdminTemplates />
+          </Layout>
         } />
         <Route path="/admin/stats" element={
-          isAdmin ? (
-            <Layout>
-              <AdminStats />
-            </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <Layout>
+            <AdminStats />
+          </Layout>
         } />
       </Routes>
     </Router>

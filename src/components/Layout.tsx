@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
 import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, UserPlus, Shield, Activity, Edit, RotateCcw } from 'lucide-react'
@@ -7,14 +7,21 @@ import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, U
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, checkAuth, signOut, updateUser, error, isLoading } = useUserStore()
   const location = useLocation()
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editDisplayName, setEditDisplayName] = useState('')
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
 
-  // 移除checkAuth调用，避免与登录流程产生冲突
-  // App组件已经有路由保护，登录成功后用户状态已在store中
+  // 简单的认证检查：如果用户未登录且不在登录页，重定向到登录页
+  React.useEffect(() => {
+    console.log('🏠 Layout: 用户状态:', !!user, '路径:', location.pathname)
+    if (!user && location.pathname !== '/login') {
+      console.log('🔄 Layout: 未登录，重定向到/login')
+      navigate('/login')
+    }
+  }, [user, location.pathname, navigate])
 
   // 初始化编辑表单的默认值
   useEffect(() => {

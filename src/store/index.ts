@@ -59,6 +59,7 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
   signIn: async (email, password) => {
+    console.log('📡 Store: 开始signIn...')
     set({ isLoading: true, error: null })
     try {
       // 实际从Supabase登录
@@ -80,10 +81,12 @@ export const useUserStore = create<UserState>((set) => ({
           ...data.user?.user_metadata
         }
       }
+      console.log('👤 Store: 登录成功，设置用户:', user)
       const isAdmin = email.includes('admin') || false
       localStorage.setItem('user', JSON.stringify(user))
       localStorage.setItem('isAdmin', isAdmin.toString())
       set({ user, isAdmin, isLoading: false, error: null })
+      console.log('✅ Store: 用户状态已更新')
       return true
     } catch (error) {
       console.error('登录失败:', error)
