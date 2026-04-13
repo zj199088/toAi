@@ -13,12 +13,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
 
-  useEffect(() => {
-    // 只在用户为null时调用checkAuth，避免重复认证检查
-    if (!user) {
-      checkAuth()
-    }
-  }, [user])
+  // 移除checkAuth调用，避免与登录流程产生冲突
+  // App组件已经有路由保护，登录成功后用户状态已在store中
 
   // 初始化编辑表单的默认值
   useEffect(() => {

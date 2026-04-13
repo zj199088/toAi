@@ -20,11 +20,9 @@ const Login: React.FC = () => {
     } else {
       success = await signIn(email, password)
     }
-    // 只有在登录成功时才导航，添加短暂延迟确保状态完全更新
+    // 只有在登录成功时才导航
     if (success) {
-      setTimeout(() => {
-        navigate('/')
-      }, 100)
+      navigate('/')
     }
   }
 
@@ -36,11 +34,9 @@ const Login: React.FC = () => {
       avatarUrl: 'https://via.placeholder.com/150'
     }
     const success = await signInWithWechat(mockWechatInfo)
-    // 只有在登录成功时才导航，添加短暂延迟确保状态完全更新
+    // 只有在登录成功时才导航
     if (success) {
-      setTimeout(() => {
-        navigate('/')
-      }, 100)
+      navigate('/')
     }
   }
 
