@@ -16,24 +16,24 @@ interface UserState {
 export const useUserStore = create<UserState>((set) => ({
   user: null,
   isAdmin: false,
-  isLoading: true,
+  isLoading: false,
   error: null,
   signUp: async (email, password, name) => {
     set({ isLoading: true, error: null })
     try {
-      // 模拟注册成功，避免Supabase请求超时
-      setTimeout(() => {
-        set({ 
-          user: {
-            id: 'user_' + Date.now(),
-            email: email,
-            user_metadata: {
-              name: name
-            }
-          }, 
-          isLoading: false 
-        })
-      }, 1000)
+      // 尝试连接Supabase进行注册
+      const response = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name }
+        }
+      })
+      if (response.error) {
+        set({ error: response.error.message, isLoading: false })
+      } else {
+        set({ user: response.data.user, isLoading: false })
+      }
     } catch (error) {
       console.error('注册失败:', error)
       set({ error: '注册失败，请稍后重试', isLoading: false })
@@ -42,19 +42,16 @@ export const useUserStore = create<UserState>((set) => ({
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
     try {
-      // 模拟登录成功，避免Supabase请求超时
-      setTimeout(() => {
-        set({ 
-          user: {
-            id: 'user_' + Date.now(),
-            email: email,
-            user_metadata: {
-              name: email.split('@')[0]
-            }
-          }, 
-          isLoading: false 
-        })
-      }, 1000)
+      // 尝试连接Supabase进行登录
+      const response = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      if (response.error) {
+        set({ error: response.error.message, isLoading: false })
+      } else {
+        set({ user: response.data.user, isLoading: false })
+      }
     } catch (error) {
       console.error('登录失败:', error)
       set({ error: '登录失败，请稍后重试', isLoading: false })
