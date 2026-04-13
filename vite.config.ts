@@ -10,7 +10,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: true
+    host: true,
+    watch: {
+      ignored: ['**/.pnpm-store/**', '**/node_modules/**']
+    }
   },
   plugins: [
     react({
