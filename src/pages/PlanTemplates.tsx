@@ -18,6 +18,11 @@ const PlanTemplates: React.FC = () => {
     getTemplates()
   }, [getTemplates])
 
+  // 查看模板数据
+  useEffect(() => {
+    console.log('模板数据:', templates)
+  }, [templates])
+
   const durations = [4, 6, 8, 12, 16, 24] // 周数
   const goals = ['减脂', '增肌', '塑形', '增强耐力', '提高灵活性']
 
@@ -101,16 +106,22 @@ const PlanTemplates: React.FC = () => {
                       锻炼内容
                     </h4>
                     <div className="space-y-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
-                      {template.exercises?.map((exercise, index) => (
-                        <div key={index} className="text-sm text-gray-700 flex flex-wrap items-center p-2 rounded-md hover:bg-white transition-colors">
-                          <span className="w-1/3 font-medium truncate">{exercise.name}</span>
-                          <span className="w-1/3 text-center text-gray-600">{exercise.sets} 组</span>
-                          <span className="w-1/3 text-right text-gray-600 font-medium">
-                            {exercise.reps ? `${exercise.reps} 次` : `${exercise.duration}`}
-                            {exercise.note && <span className="ml-1 text-blue-500 text-xs">({exercise.note})</span>}
-                          </span>
+                      {Array.isArray(template.exercises) && template.exercises.length > 0 ? (
+                        template.exercises.map((exercise, index) => (
+                          <div key={index} className="text-sm text-gray-700 flex flex-wrap items-center p-2 rounded-md hover:bg-white transition-colors">
+                            <span className="w-1/3 font-medium truncate">{exercise.name}</span>
+                            <span className="w-1/3 text-center text-gray-600">{exercise.sets} 组</span>
+                            <span className="w-1/3 text-right text-gray-600 font-medium">
+                              {exercise.reps ? `${exercise.reps} 次` : `${exercise.duration}`}
+                              {exercise.note && <span className="ml-1 text-blue-500 text-xs">({exercise.note})</span>}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-4">
+                          暂无锻炼内容
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}

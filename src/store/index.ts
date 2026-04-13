@@ -341,10 +341,12 @@ export const useTemplateStore = create<TemplateState>((set) => ({
         set({ templates: defaultTemplates, isLoading: false })
       } else {
         // 处理从数据库获取的数据
+        console.log('从数据库获取的模板数据:', data)
         const processedTemplates = data.map((template: any) => ({
           ...template,
-          exercises: typeof template.exercises === 'string' ? JSON.parse(template.exercises) : template.exercises
+          exercises: template.exercises || []
         }))
+        console.log('处理后的模板数据:', processedTemplates)
         set({ templates: processedTemplates, isLoading: false })
       }
     } catch (error) {
