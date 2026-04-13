@@ -144,7 +144,8 @@ const Home: React.FC = () => {
                   <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="space-y-5">
+                {/* 计划名称 */}
                 <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
                   <h3 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-cyan-400" />
@@ -152,19 +153,23 @@ const Home: React.FC = () => {
                   </h3>
                   <p className="text-xl font-bold text-white animate-fade-in">{currentPlan.name}</p>
                 </div>
-                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-green-500/20 shadow-xl hover:shadow-green-500/20 hover:border-green-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
-                  <h3 className="text-sm font-bold text-green-300 mb-2 flex items-center">
-                    <Target className="h-4 w-4 mr-2 text-green-400" />
-                    目标
-                  </h3>
-                  <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.2s' }}>{currentPlan.goal}</p>
-                </div>
-                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-purple-500/20 shadow-xl hover:shadow-purple-500/20 hover:border-purple-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
-                  <h3 className="text-sm font-bold text-purple-300 mb-2 flex items-center">
-                    <Timer className="h-4 w-4 mr-2 text-purple-400" />
-                    时长
-                  </h3>
-                  <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.4s' }}>{currentPlan.duration} 周</p>
+                
+                {/* 目标和时长 - 小屏幕时并排 */}
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-green-500/20 shadow-xl hover:shadow-green-500/20 hover:border-green-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                    <h3 className="text-sm font-bold text-green-300 mb-2 flex items-center">
+                      <Target className="h-4 w-4 mr-2 text-green-400" />
+                      目标
+                    </h3>
+                    <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.2s' }}>{currentPlan.goal}</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-purple-500/20 shadow-xl hover:shadow-purple-500/20 hover:border-purple-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                    <h3 className="text-sm font-bold text-purple-300 mb-2 flex items-center">
+                      <Timer className="h-4 w-4 mr-2 text-purple-400" />
+                      时长
+                    </h3>
+                    <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.4s' }}>{currentPlan.duration} 周</p>
+                  </div>
                 </div>
               </div>
               <div className="mt-6">
