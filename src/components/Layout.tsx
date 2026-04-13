@@ -44,7 +44,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: '首页', path: '/', icon: <Home className="h-5 w-5" /> },
     { name: '生成计划', path: '/plan/generate', icon: <Calendar className="h-5 w-5" /> },
     { name: '模板选择', path: '/plan/templates', icon: <Shield className="h-5 w-5" /> },
-    { name: '自定义模板', path: '/plan/templates#custom-plan', icon: <Edit className="h-5 w-5" /> },
+    { name: '自定义模板', path: '/plan/custom', icon: <Edit className="h-5 w-5" /> },
     { name: '锻炼跟踪', path: '/track', icon: <Activity className="h-5 w-5" /> },
     { name: '饮食计划', path: '/diet', icon: <Utensils className="h-5 w-5" /> }
   ]

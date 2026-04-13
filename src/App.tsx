@@ -6,6 +6,7 @@ import Home from "@/pages/Home";
 import Login from './pages/Login'
 import PlanGenerate from './pages/PlanGenerate'
 import PlanTemplates from './pages/PlanTemplates'
+import PlanCustom from './pages/PlanCustom'
 import Track from './pages/Track'
 import Diet from './pages/Diet'
 import WorkoutRecords from './pages/WorkoutRecords'
@@ -70,6 +71,13 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <PlanTemplates />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/plan/custom" element={
+          <ProtectedRoute>
+            <Layout>
+              <PlanCustom />
             </Layout>
           </ProtectedRoute>
         } />
