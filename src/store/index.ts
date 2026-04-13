@@ -129,45 +129,46 @@ interface FitnessPlanState {
 }
 
 export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
-  plans: [],
-  currentPlan: null,
+  plans: typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : [],
+  currentPlan: typeof window !== 'undefined' && localStorage.getItem('currentPlan') ? JSON.parse(localStorage.getItem('currentPlan')!) : null,
   isLoading: false,
   error: null,
   createPlan: async (plan) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('fitness_plans')
-      .insert(plan)
-      .select()
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
+    try {
+      // 使用localStorage保存健身计划
+      const newPlan = { ...plan, id: Date.now().toString(), created_at: new Date().toISOString() }
+      const storedPlans = typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : []
+      const updatedPlans = [...storedPlans, newPlan]
+      localStorage.setItem('fitnessPlans', JSON.stringify(updatedPlans))
+      localStorage.setItem('currentPlan', JSON.stringify(newPlan))
       set((state) => ({ 
-        plans: [...state.plans, data[0]],
-        currentPlan: data[0],
+        plans: updatedPlans,
+        currentPlan: newPlan,
         isLoading: false 
       }))
+    } catch (error) {
+      console.error('创建健身计划失败:', error)
+      set({ error: '创建健身计划失败，请稍后重试', isLoading: false })
     }
   },
   getPlans: async () => {
     set({ isLoading: true, error: null })
-    // 获取当前用户ID
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      set({ plans: [], isLoading: false })
-      return
-    }
-    const { data, error } = await supabase
-      .from('fitness_plans')
-      .select('*')
-      .eq('user_id', session.user.id)
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
-      set({ plans: data, isLoading: false })
+    try {
+      // 从localStorage获取健身计划
+      const storedPlans = typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : []
+      set({ plans: storedPlans, isLoading: false })
+    } catch (error) {
+      console.error('获取健身计划失败:', error)
+      set({ error: '获取健身计划失败，请稍后重试', isLoading: false })
     }
   },
   setCurrentPlan: (plan) => {
+    if (plan) {
+      localStorage.setItem('currentPlan', JSON.stringify(plan))
+    } else {
+      localStorage.removeItem('currentPlan')
+    }
     set({ currentPlan: plan })
   }
 }))
@@ -181,34 +182,36 @@ interface WorkoutRecordState {
 }
 
 export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
-  records: [],
+  records: typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : [],
   isLoading: false,
   error: null,
   addRecord: async (record) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('workout_records')
-      .insert(record)
-      .select()
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
+    try {
+      // 使用localStorage保存锻炼记录
+      const newRecord = { ...record, id: Date.now().toString() }
+      const storedRecords = typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : []
+      const updatedRecords = [...storedRecords, newRecord]
+      localStorage.setItem('workoutRecords', JSON.stringify(updatedRecords))
       set((state) => ({ 
-        records: [...state.records, data[0]],
+        records: updatedRecords,
         isLoading: false 
       }))
+    } catch (error) {
+      console.error('添加锻炼记录失败:', error)
+      set({ error: '添加锻炼记录失败，请稍后重试', isLoading: false })
     }
   },
   getRecords: async (planId) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('workout_records')
-      .select('*')
-      .eq('plan_id', planId)
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
-      set({ records: data, isLoading: false })
+    try {
+      // 从localStorage获取锻炼记录
+      const storedRecords = typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : []
+      const filteredRecords = storedRecords.filter((r: any) => r.plan_id === planId)
+      set({ records: filteredRecords, isLoading: false })
+    } catch (error) {
+      console.error('获取锻炼记录失败:', error)
+      set({ error: '获取锻炼记录失败，请稍后重试', isLoading: false })
     }
   }
 }))
@@ -222,40 +225,35 @@ interface BodyMeasurementState {
 }
 
 export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
-  measurements: [],
+  measurements: typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : [],
   isLoading: false,
   error: null,
   addMeasurement: async (measurement) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('body_measurements')
-      .insert(measurement)
-      .select()
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
+    try {
+      // 使用localStorage保存身体数据
+      const newMeasurement = { ...measurement, id: Date.now().toString() }
+      const storedMeasurements = typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : []
+      const updatedMeasurements = [...storedMeasurements, newMeasurement]
+      localStorage.setItem('bodyMeasurements', JSON.stringify(updatedMeasurements))
       set((state) => ({ 
-        measurements: [...state.measurements, data[0]],
+        measurements: updatedMeasurements,
         isLoading: false 
       }))
+    } catch (error) {
+      console.error('添加身体数据失败:', error)
+      set({ error: '添加身体数据失败，请稍后重试', isLoading: false })
     }
   },
   getMeasurements: async () => {
     set({ isLoading: true, error: null })
-    // 获取当前用户ID
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      set({ measurements: [], isLoading: false })
-      return
-    }
-    const { data, error } = await supabase
-      .from('body_measurements')
-      .select('*')
-      .eq('user_id', session.user.id)
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
-      set({ measurements: data, isLoading: false })
+    try {
+      // 从localStorage获取身体数据
+      const storedMeasurements = typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : []
+      set({ measurements: storedMeasurements, isLoading: false })
+    } catch (error) {
+      console.error('获取身体数据失败:', error)
+      set({ error: '获取身体数据失败，请稍后重试', isLoading: false })
     }
   }
 }))
