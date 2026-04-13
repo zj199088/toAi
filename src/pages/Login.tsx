@@ -11,15 +11,21 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [name, setName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmitting || isLoading) return
+    setIsSubmitting(true)
+    
     let success = false
     if (isRegistering) {
       success = await signUp(email, password, name)
     } else {
       success = await signIn(email, password)
     }
+    
+    setIsSubmitting(false)
     // 只有在登录成功时才导航
     if (success) {
       navigate('/')
@@ -27,6 +33,9 @@ const Login: React.FC = () => {
   }
 
   const handleWechatLogin = async () => {
+    if (isSubmitting || isLoading) return
+    setIsSubmitting(true)
+    
     // 模拟微信登录，实际项目中会跳转到微信授权页面
     const mockWechatInfo = {
       openid: 'mock_openid_123',
@@ -34,6 +43,8 @@ const Login: React.FC = () => {
       avatarUrl: 'https://via.placeholder.com/150'
     }
     const success = await signInWithWechat(mockWechatInfo)
+    
+    setIsSubmitting(false)
     // 只有在登录成功时才导航
     if (success) {
       navigate('/')
@@ -111,10 +122,10 @@ const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
                 className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? '处理中...' : isRegistering ? '注册' : '登录'}
+                {(isLoading || isSubmitting) ? '处理中...' : isRegistering ? '注册' : '登录'}
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -142,10 +153,11 @@ const Login: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleWechatLogin}
-                className="w-full flex items-center justify-center space-x-2 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 transition-colors"
+                disabled={isLoading || isSubmitting}
+                className="w-full flex items-center justify-center space-x-2 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageSquare size={18} />
-                <span>微信登录</span>
+                <span>{(isLoading || isSubmitting) ? '处理中...' : '微信登录'}</span>
               </button>
             </div>
           </div>
