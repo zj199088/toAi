@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { useFitnessPlanStore } from '../store'
+import { useFitnessPlanStore, useUserStore } from '../store'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '../utils/cn'
 import { Calendar, Target, ChevronRight, Check } from 'lucide-react'
 
 const PlanTemplates: React.FC = () => {
   const { createPlan } = useFitnessPlanStore()
+  const { user } = useUserStore()
   const navigate = useNavigate()
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [duration, setDuration] = useState(4) // 周数
@@ -56,7 +57,7 @@ const PlanTemplates: React.FC = () => {
       duration: duration,
       start_date: startDate.toISOString().split('T')[0],
       end_date: endDate.toISOString().split('T')[0],
-      user_id: 'user123' // 实际项目中应该从用户状态中获取
+      user_id: user?.id || 'user123' // 使用真实用户ID，如果没有则使用默认值
     }
 
     await createPlan(plan)

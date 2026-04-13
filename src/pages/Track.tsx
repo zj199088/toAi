@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useFitnessPlanStore, useWorkoutRecordStore, useBodyMeasurementStore } from '../store'
+import { useFitnessPlanStore, useWorkoutRecordStore, useBodyMeasurementStore, useUserStore } from '../store'
 import { cn } from '../utils/cn'
 import { Check, Calendar, BarChart3, Activity, ChevronRight, Plus, Edit } from 'lucide-react'
 
@@ -7,6 +7,7 @@ const Track: React.FC = () => {
   const { currentPlan } = useFitnessPlanStore()
   const { addRecord, records } = useWorkoutRecordStore()
   const { addMeasurement, measurements } = useBodyMeasurementStore()
+  const { user } = useUserStore()
   const [selectedDay, setSelectedDay] = useState(new Date())
   const [showBodyMeasurementForm, setShowBodyMeasurementForm] = useState(false)
   const [bodyMeasurement, setBodyMeasurement] = useState({
@@ -44,7 +45,7 @@ const Track: React.FC = () => {
     if (!workout || !currentPlan) return
 
     addRecord({
-      user_id: 'user123',
+      user_id: user?.id || 'user123',
       plan_id: currentPlan.id,
       schedule_id: 'schedule123',
       exercise_id: `exercise_${exercise}`,
@@ -58,7 +59,7 @@ const Track: React.FC = () => {
   const handleBodyMeasurementSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     addMeasurement({
-      user_id: 'user123',
+      user_id: user?.id || 'user123',
       date: new Date().toISOString().split('T')[0],
       weight: parseFloat(bodyMeasurement.weight),
       waist: parseFloat(bodyMeasurement.waist),
