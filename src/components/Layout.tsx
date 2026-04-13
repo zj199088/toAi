@@ -79,7 +79,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 ) : (
                   <User size={20} className="text-gray-700" />
                 )}
-                <span className="text-gray-700">{user.user_metadata?.displayName || user.user_metadata?.name || user.email}</span>
+                <span className="text-gray-700">{user.user_metadata?.displayName || user.user_metadata?.name || user.email.split('@')[0] || '用户'}</span>
                 <button
                   onClick={signOut}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
@@ -150,7 +150,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     ) : (
                       <User size={18} />
                     )}
-                    <span className="text-gray-700">{user.user_metadata?.displayName || user.user_metadata?.name || user.email}</span>
+                    <span className="text-gray-700">{user.user_metadata?.displayName || user.user_metadata?.name || user.email.split('@')[0] || '用户'}</span>
                   </div>
                   <button
                     onClick={() => {
