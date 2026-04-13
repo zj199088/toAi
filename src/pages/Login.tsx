@@ -1,11 +1,9 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
 import { Mail, Lock, User, MessageSquare } from 'lucide-react'
 
 const Login: React.FC = () => {
-  const navigate = useNavigate()
   const { signUp, signIn, signInWithWechat, error, isLoading } = useUserStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,7 +22,7 @@ const Login: React.FC = () => {
     }
     
     if (success) {
-      navigate('/')
+      window.location.href = '/'
     }
   }
 
@@ -39,7 +37,7 @@ const Login: React.FC = () => {
     const success = await signInWithWechat(mockWechatInfo)
     
     if (success) {
-      navigate('/')
+      window.location.href = '/'
     }
   }
 
@@ -114,10 +112,10 @@ const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading || isSubmitting}
+                disabled={isLoading}
                 className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {(isLoading || isSubmitting) ? '处理中...' : isRegistering ? '注册' : '登录'}
+                {isLoading ? '处理中...' : isRegistering ? '注册' : '登录'}
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -145,11 +143,11 @@ const Login: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleWechatLogin}
-                disabled={isLoading || isSubmitting}
+                disabled={isLoading}
                 className="w-full flex items-center justify-center space-x-2 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageSquare size={18} />
-                <span>{(isLoading || isSubmitting) ? '处理中...' : '微信登录'}</span>
+                <span>{isLoading ? '处理中...' : '微信登录'}</span>
               </button>
             </div>
           </div>
