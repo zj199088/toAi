@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
-import { Mail, Lock, User, Wechat } from 'lucide-react'
+import { Mail, Lock, User, MessageSquare } from 'lucide-react'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
@@ -137,7 +137,7 @@ const Login: React.FC = () => {
                 onClick={handleWechatLogin}
                 className="w-full flex items-center justify-center space-x-2 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 transition-colors"
               >
-                <Wechat size={18} />
+                <MessageSquare size={18} />
                 <span>微信登录</span>
               </button>
             </div>
