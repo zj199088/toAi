@@ -45,34 +45,58 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
-          <Layout>
-            <Home />
-          </Layout>
+          user ? (
+            <Layout>
+              <Home />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/plan/generate" element={
-          <Layout>
-            <PlanGenerate />
-          </Layout>
+          user ? (
+            <Layout>
+              <PlanGenerate />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/plan/templates" element={
-          <Layout>
-            <PlanTemplates />
-          </Layout>
+          user ? (
+            <Layout>
+              <PlanTemplates />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/track" element={
-          <Layout>
-            <Track />
-          </Layout>
+          user ? (
+            <Layout>
+              <Track />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/diet" element={
-          <Layout>
-            <Diet />
-          </Layout>
+          user ? (
+            <Layout>
+              <Diet />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/records" element={
-          <Layout>
-            <WorkoutRecords />
-          </Layout>
+          user ? (
+            <Layout>
+              <WorkoutRecords />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
         <Route path="/admin/users" element={
           isAdmin ? (
