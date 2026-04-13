@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
-import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, UserPlus, Shield, Activity, Edit, RotateCcw } from 'lucide-react'
+import { Menu, X, User, Home, Calendar, BarChart3, Utensils, Settings, LogOut, UserPlus, Shield, Activity, Edit, RotateCcw, ArrowLeft } from 'lucide-react'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, signOut, updateUser, error } = useUserStore()
   const location = useLocation()
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editDisplayName, setEditDisplayName] = useState('')
@@ -179,19 +180,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className="md:ml-64 min-h-screen">
         {/* 顶部栏 */}
         <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-cyan-500/20">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="container mx-auto px-4 py-4 flex items-center">
+            {/* 返回按钮 */}
+            {location.pathname !== '/' && (
+              <button
+                className="mr-4 text-gray-300 hover:text-cyan-400 transition-colors flex items-center"
+                onClick={() => navigate(-1)}
+                title="返回上一页"
+              >
+                <ArrowLeft className="h-5 w-5 mr-1" />
+                <span className="hidden md:inline">返回</span>
+              </button>
+            )}
+            
+            {/* 移动端菜单按钮 */}
             <button
               className="md:hidden text-gray-300 hover:text-white transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
+            
+            {/* 移动端标题 */}
             <div className="flex-1 md:hidden">
               <Link to="/" className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">
                 久坐赎罪健身
               </Link>
             </div>
-            <div className="hidden md:block">
+            
+            {/* 桌面端标题 */}
+            <div className="hidden md:block flex-1">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
                 {navItems.find(item => location.pathname === item.path)?.name || '久坐赎罪健身'}
               </h1>
