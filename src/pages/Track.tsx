@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useFitnessPlanStore, useWorkoutRecordStore, useBodyMeasurementStore, useUserStore } from '../store'
 import { cn } from '../utils/cn'
+import { supabase } from '../lib/supabase'
 import { 
   Check, Calendar, BarChart3, Activity, ChevronRight, Plus, Edit,
   Zap, Timer, Dumbbell, Flame, Trophy, HeartPulse, Target
@@ -229,29 +230,96 @@ const Track: React.FC = () => {
           return v.toString(16);
         });
       };
-      
-      const record = {
-        user_id: user?.id || user?.user_metadata?.id || 'user123',
-        plan_id: currentPlan.id,
-        schedule_id: null,
-        exercise_id: null,
-        date: selectedDay.toISOString().split('T')[0],
-        sets_completed: 3,
-        reps_completed: 15,
-        created_at: new Date().toISOString()
-      }
-      
-      console.log('📝 准备保存的记录:', record)
-      
-      // 保存记录到数据库
-      await addRecord(record)
-      
-      // 清除本地存储，确保只使用数据库数据
+
       try {
-        localStorage.removeItem('workout_records')
-        console.log('✅ 已清除本地存储，只使用数据库数据')
+        // 获取当前日期对应的训练日程
+        const dayOfWeek = selectedDay.getDay() || 7 // 调整为1-7
+        console.log('📅 当前星期几:', dayOfWeek)
+
+        // 从数据库获取训练日程
+        const { data: schedules, error: scheduleError } = await supabase
+          .from('workout_schedules')
+          .select('*')
+          .eq('plan_id', currentPlan.id)
+          .eq('day', dayOfWeek)
+
+        if (scheduleError) {
+          console.error('❌ 获取训练日程失败:', scheduleError)
+          throw scheduleError
+        }
+
+        if (schedules && schedules.length > 0) {
+          const schedule = schedules[0]
+          console.log('✅ 成功获取训练日程:', schedule)
+
+          // 从数据库获取训练动作
+          const { data: exercises, error: exerciseError } = await supabase
+            .from('workout_exercises')
+            .select('*')
+            .eq('schedule_id', schedule.id)
+            .eq('name', exerciseName)
+
+          if (exerciseError) {
+            console.error('❌ 获取训练动作失败:', exerciseError)
+            throw exerciseError
+          }
+
+          let exerciseId = null
+          if (exercises && exercises.length > 0) {
+            exerciseId = exercises[0].id
+            console.log('✅ 成功获取训练动作:', exercises[0])
+          } else {
+            // 如果训练动作不存在，创建一个新的
+            const { data: newExercise, error: createExerciseError } = await supabase
+              .from('workout_exercises')
+              .insert({
+                id: generateUUID(),
+                schedule_id: schedule.id,
+                name: exerciseName,
+                sets: 3,
+                reps: 15,
+                created_at: new Date().toISOString()
+              })
+              .select()
+
+            if (createExerciseError) {
+              console.error('❌ 创建训练动作失败:', createExerciseError)
+              throw createExerciseError
+            }
+
+            exerciseId = newExercise[0].id
+            console.log('✅ 成功创建训练动作:', newExercise[0])
+          }
+
+          // 创建锻炼记录
+          const record = {
+            user_id: user?.id || user?.user_metadata?.id || 'user123',
+            plan_id: currentPlan.id,
+            schedule_id: schedule.id,
+            exercise_id: exerciseId,
+            date: selectedDay.toISOString().split('T')[0],
+            sets_completed: 3,
+            reps_completed: 15,
+            created_at: new Date().toISOString()
+          }
+          
+          console.log('📝 准备保存的记录:', record)
+          
+          // 保存记录到数据库
+          await addRecord(record)
+          
+          // 清除本地存储，确保只使用数据库数据
+          try {
+            localStorage.removeItem('workout_records')
+            console.log('✅ 已清除本地存储，只使用数据库数据')
+          } catch (error) {
+            console.error('❌ 清除本地存储失败:', error)
+          }
+        } else {
+          console.error('❌ 未找到对应训练日程')
+        }
       } catch (error) {
-        console.error('❌ 清除本地存储失败:', error)
+        console.error('❌ 处理锻炼记录失败:', error)
       }
     } else {
       console.log('⚠️ 并非所有组都完成，不添加记录')

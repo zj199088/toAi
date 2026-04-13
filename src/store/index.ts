@@ -184,8 +184,16 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
   createPlan: async (plan) => {
     set({ isLoading: true, error: null })
     try {
+      // 生成 UUID
+      const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
       // 保存到Supabase数据库
-      const { data, error } = await supabase
+      const { data: planData, error: planError } = await supabase
         .from('fitness_plans')
         .insert({
           ...plan,
@@ -193,13 +201,115 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
         })
         .select()
 
-      if (error) {
-        throw error
+      if (planError) {
+        throw planError
+      }
+
+      const fitnessPlan = planData[0]
+      console.log('✅ 成功创建健身计划:', fitnessPlan)
+
+      // 为每个计划创建7天的训练日程
+      const workoutSchedules = []
+      
+      // 根据健身目标生成不同的训练计划
+      const getExercisesByGoal = (goal: string, day: number) => {
+        const baseExercises = {
+          '减脂': [
+            { name: '标准俯卧撑', sets: 3, reps: 15 },
+            { name: '深蹲', sets: 3, reps: 20 },
+            { name: '平板支撑', sets: 3, duration: 45 },
+            { name: '开合跳', sets: 3, reps: 30 }
+          ],
+          '增肌': [
+            { name: '标准俯卧撑', sets: 4, reps: 12 },
+            { name: '深蹲', sets: 4, reps: 15 },
+            { name: '引体向上', sets: 3, reps: 8 },
+            { name: '卧推', sets: 3, reps: 10 }
+          ],
+          '塑形': [
+            { name: '标准俯卧撑', sets: 3, reps: 12 },
+            { name: '深蹲', sets: 3, reps: 15 },
+            { name: '平板支撑', sets: 3, duration: 60 },
+            { name: '侧平板支撑', sets: 3, duration: 30 }
+          ],
+          '增强耐力': [
+            { name: '标准俯卧撑', sets: 4, reps: 20 },
+            { name: '深蹲', sets: 4, reps: 25 },
+            { name: '平板支撑', sets: 4, duration: 60 },
+            { name: '开合跳', sets: 4, reps: 40 }
+          ],
+          '提高灵活性': [
+            { name: '瑜伽伸展', sets: 2, duration: 120 },
+            { name: '普拉提', sets: 3, duration: 90 },
+            { name: '动态拉伸', sets: 3, duration: 60 },
+            { name: '平衡训练', sets: 3, duration: 45 }
+          ]
+        }
+        
+        return baseExercises[goal] || baseExercises['减脂']
+      }
+
+      // 创建7天的训练日程
+      for (let day = 1; day <= 7; day++) {
+        let workoutType = ''
+        switch (day) {
+          case 1: workoutType = '胸+核心'; break
+          case 2: workoutType = '背+核心'; break
+          case 3: workoutType = '腿+核心'; break
+          case 4: workoutType = '休息'; break
+          case 5: workoutType = '胸+核心'; break
+          case 6: workoutType = '背+核心'; break
+          case 7: workoutType = '腿+核心'; break
+        }
+
+        // 只有非休息日才创建训练动作
+        if (workoutType !== '休息') {
+          const { data: scheduleData, error: scheduleError } = await supabase
+            .from('workout_schedules')
+            .insert({
+              id: generateUUID(),
+              plan_id: fitnessPlan.id,
+              day: day,
+              workout_type: workoutType,
+              description: `${workoutType}训练`,
+              created_at: new Date().toISOString()
+            })
+            .select()
+
+          if (scheduleError) {
+            throw scheduleError
+          }
+
+          const schedule = scheduleData[0]
+          workoutSchedules.push(schedule)
+          console.log(`✅ 成功创建训练日程 (第${day}天):`, schedule)
+
+          // 创建训练动作
+          const exercises = getExercisesByGoal(plan.goal, day)
+          for (const exercise of exercises) {
+            const { error: exerciseError } = await supabase
+              .from('workout_exercises')
+              .insert({
+                id: generateUUID(),
+                schedule_id: schedule.id,
+                name: exercise.name,
+                sets: exercise.sets,
+                reps: exercise.reps,
+                duration: exercise.duration,
+                created_at: new Date().toISOString()
+              })
+
+            if (exerciseError) {
+              throw exerciseError
+            }
+          }
+          console.log(`✅ 成功创建${exercises.length}个训练动作`)
+        }
       }
 
       set((state) => ({ 
-        plans: [...state.plans, data[0]],
-        currentPlan: data[0],
+        plans: [...state.plans, fitnessPlan],
+        currentPlan: fitnessPlan,
         isLoading: false 
       }))
     } catch (error) {
