@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
 import { Mail, Lock, User, MessageSquare } from 'lucide-react'
 
 const Login: React.FC = () => {
+  const navigate = useNavigate()
   const { signUp, signIn, signInWithWechat, error, isLoading } = useUserStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,7 +24,9 @@ const Login: React.FC = () => {
     }
     
     if (success) {
-      window.location.href = '/'
+      setTimeout(() => {
+        navigate('/')
+      }, 50)
     }
   }
 
@@ -37,7 +41,9 @@ const Login: React.FC = () => {
     const success = await signInWithWechat(mockWechatInfo)
     
     if (success) {
-      window.location.href = '/'
+      setTimeout(() => {
+        navigate('/')
+      }, 50)
     }
   }
 
