@@ -102,7 +102,7 @@ export const useUserStore = create<UserState>((set) => ({
   },
   checkAuth: async () => {
     try {
-      set({ isLoading: true })
+      set({ isLoading: true, error: null })
       
       // 先尝试从localStorage获取用户信息
       const storedUser = localStorage.getItem('user')
@@ -112,7 +112,8 @@ export const useUserStore = create<UserState>((set) => ({
         set({ 
           user: JSON.parse(storedUser), 
           isAdmin: storedIsAdmin === 'true', 
-          isLoading: false 
+          isLoading: false, 
+          error: null
         })
         return
       }
@@ -122,7 +123,12 @@ export const useUserStore = create<UserState>((set) => ({
       
       if (error) {
         console.error('从Supabase获取用户信息失败:', error)
-        set({ user: null, isAdmin: false, isLoading: false })
+        set({ 
+          user: null, 
+          isAdmin: false, 
+          isLoading: false, 
+          error: '连接服务器失败，请稍后重试'
+        })
         return
       }
       
@@ -139,14 +145,29 @@ export const useUserStore = create<UserState>((set) => ({
         const isAdmin = data.user.email?.includes('admin') || false
         localStorage.setItem('user', JSON.stringify(user))
         localStorage.setItem('isAdmin', isAdmin.toString())
-        set({ user, isAdmin, isLoading: false })
+        set({ 
+          user, 
+          isAdmin, 
+          isLoading: false, 
+          error: null
+        })
       } else {
-        set({ user: null, isAdmin: false, isLoading: false })
+        set({ 
+          user: null, 
+          isAdmin: false, 
+          isLoading: false, 
+          error: null
+        })
       }
     } catch (error) {
       console.error('认证检查失败:', error)
       // 即使出错，也要确保设置isLoading为false
-      set({ user: null, isAdmin: false, isLoading: false })
+      set({ 
+        user: null, 
+        isAdmin: false, 
+        isLoading: false, 
+        error: '连接服务器失败，请稍后重试'
+      })
     }
   },
   signInWithWechat: async (wechatInfo) => {

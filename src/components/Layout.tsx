@@ -5,7 +5,7 @@ import { cn } from '../utils/cn'
 import { Menu, X, User } from 'lucide-react'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAdmin, checkAuth, signOut } = useUserStore()
+  const { user, isAdmin, checkAuth, signOut, error, isLoading } = useUserStore()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
@@ -178,6 +178,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* 主内容 */}
       <main className="container mx-auto px-4 pt-24 pb-12">
+        {/* 错误信息 */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="text-red-500">⚠️</div>
+              <div className="text-red-700">{error}</div>
+            </div>
+          </div>
+        )}
         {children}
       </main>
 
