@@ -176,22 +176,29 @@ interface FitnessPlanState {
 }
 
 export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
-  plans: typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : [],
-  currentPlan: typeof window !== 'undefined' && localStorage.getItem('currentPlan') ? JSON.parse(localStorage.getItem('currentPlan')!) : null,
+  plans: [],
+  currentPlan: null,
   isLoading: false,
   error: null,
   createPlan: async (plan) => {
     set({ isLoading: true, error: null })
     try {
-      // 使用localStorage保存健身计划
-      const newPlan = { ...plan, id: Date.now().toString(), created_at: new Date().toISOString() }
-      const storedPlans = typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : []
-      const updatedPlans = [...storedPlans, newPlan]
-      localStorage.setItem('fitnessPlans', JSON.stringify(updatedPlans))
-      localStorage.setItem('currentPlan', JSON.stringify(newPlan))
+      // 保存到Supabase数据库
+      const { data, error } = await supabase
+        .from('fitness_plans')
+        .insert({
+          ...plan,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        throw error
+      }
+
       set((state) => ({ 
-        plans: updatedPlans,
-        currentPlan: newPlan,
+        plans: [...state.plans, data[0]],
+        currentPlan: data[0],
         isLoading: false 
       }))
     } catch (error) {
@@ -202,20 +209,27 @@ export const useFitnessPlanStore = create<FitnessPlanState>((set) => ({
   getPlans: async () => {
     set({ isLoading: true, error: null })
     try {
-      // 从localStorage获取健身计划
-      const storedPlans = typeof window !== 'undefined' && localStorage.getItem('fitnessPlans') ? JSON.parse(localStorage.getItem('fitnessPlans')!) : []
-      set({ plans: storedPlans, isLoading: false })
+      // 从Supabase数据库获取健身计划
+      const { data, error } = await supabase
+        .from('fitness_plans')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      set({ plans: data || [], isLoading: false })
+      // 设置最新的计划为当前计划
+      if (data && data.length > 0) {
+        set({ currentPlan: data[0] })
+      }
     } catch (error) {
       console.error('获取健身计划失败:', error)
       set({ error: '获取健身计划失败，请稍后重试', isLoading: false })
     }
   },
-  setCurrentPlan: (plan) => {
-    if (plan) {
-      localStorage.setItem('currentPlan', JSON.stringify(plan))
-    } else {
-      localStorage.removeItem('currentPlan')
-    }
+  setCurrentPlan: async (plan) => {
     set({ currentPlan: plan })
   }
 }))
@@ -288,19 +302,27 @@ interface BodyMeasurementState {
 }
 
 export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
-  measurements: typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : [],
+  measurements: [],
   isLoading: false,
   error: null,
   addMeasurement: async (measurement) => {
     set({ isLoading: true, error: null })
     try {
-      // 使用localStorage保存身体数据
-      const newMeasurement = { ...measurement, id: Date.now().toString() }
-      const storedMeasurements = typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : []
-      const updatedMeasurements = [...storedMeasurements, newMeasurement]
-      localStorage.setItem('bodyMeasurements', JSON.stringify(updatedMeasurements))
+      // 保存到Supabase数据库
+      const { data, error } = await supabase
+        .from('body_measurements')
+        .insert({
+          ...measurement,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        throw error
+      }
+
       set((state) => ({ 
-        measurements: updatedMeasurements,
+        measurements: [...state.measurements, data[0]],
         isLoading: false 
       }))
     } catch (error) {
@@ -311,9 +333,17 @@ export const useBodyMeasurementStore = create<BodyMeasurementState>((set) => ({
   getMeasurements: async () => {
     set({ isLoading: true, error: null })
     try {
-      // 从localStorage获取身体数据
-      const storedMeasurements = typeof window !== 'undefined' && localStorage.getItem('bodyMeasurements') ? JSON.parse(localStorage.getItem('bodyMeasurements')!) : []
-      set({ measurements: storedMeasurements, isLoading: false })
+      // 从Supabase数据库获取身体数据
+      const { data, error } = await supabase
+        .from('body_measurements')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      set({ measurements: data || [], isLoading: false })
     } catch (error) {
       console.error('获取身体数据失败:', error)
       set({ error: '获取身体数据失败，请稍后重试', isLoading: false })
@@ -359,6 +389,129 @@ export const useTemplateStore = create<TemplateState>((set) => ({
       console.error('获取模板失败:', error)
       // 如果发生异常，显示错误
       set({ templates: [], isLoading: false, error: '获取模板失败，请稍后重试' })
+    }
+  }
+}))
+
+interface DietPlanState {
+  plans: any[]
+  currentPlan: any | null
+  isLoading: boolean
+  error: string | null
+  createPlan: (plan: any) => Promise<void>
+  getPlans: () => Promise<void>
+}
+
+export const useDietPlanStore = create<DietPlanState>((set) => ({
+  plans: [],
+  currentPlan: null,
+  isLoading: false,
+  error: null,
+  createPlan: async (plan) => {
+    set({ isLoading: true, error: null })
+    try {
+      // 保存到Supabase数据库
+      const { data, error } = await supabase
+        .from('diet_plans')
+        .insert({
+          ...plan,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        throw error
+      }
+
+      set((state) => ({ 
+        plans: [...state.plans, data[0]],
+        currentPlan: data[0],
+        isLoading: false 
+      }))
+    } catch (error) {
+      console.error('创建饮食计划失败:', error)
+      set({ error: '创建饮食计划失败，请稍后重试', isLoading: false })
+    }
+  },
+  getPlans: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      // 从Supabase数据库获取饮食计划
+      const { data, error } = await supabase
+        .from('diet_plans')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      set({ plans: data || [], isLoading: false })
+      // 设置最新的计划为当前计划
+      if (data && data.length > 0) {
+        set({ currentPlan: data[0] })
+      }
+    } catch (error) {
+      console.error('获取饮食计划失败:', error)
+      set({ error: '获取饮食计划失败，请稍后重试', isLoading: false })
+    }
+  }
+}))
+
+interface DietRecordState {
+  records: any[]
+  isLoading: boolean
+  error: string | null
+  addRecord: (record: any) => Promise<void>
+  getRecords: () => Promise<void>
+}
+
+export const useDietRecordStore = create<DietRecordState>((set) => ({
+  records: [],
+  isLoading: false,
+  error: null,
+  addRecord: async (record) => {
+    set({ isLoading: true, error: null })
+    try {
+      // 保存到Supabase数据库
+      const { data, error } = await supabase
+        .from('diet_records')
+        .insert({
+          ...record,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        throw error
+      }
+
+      set((state) => ({ 
+        records: [...state.records, data[0]],
+        isLoading: false 
+      }))
+    } catch (error) {
+      console.error('添加饮食记录失败:', error)
+      set({ error: '添加饮食记录失败，请稍后重试', isLoading: false })
+    }
+  },
+  getRecords: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      // 从Supabase数据库获取饮食记录
+      const { data, error } = await supabase
+        .from('diet_records')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      set({ records: data || [], isLoading: false })
+    } catch (error) {
+      console.error('获取饮食记录失败:', error)
+      set({ error: '获取饮食记录失败，请稍后重试', isLoading: false })
     }
   }
 }))

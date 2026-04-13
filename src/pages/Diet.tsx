@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
-import { useFitnessPlanStore } from '../store'
+import React, { useState, useEffect } from 'react'
+import { useFitnessPlanStore, useDietPlanStore, useDietRecordStore } from '../store'
 import { cn } from '../utils/cn'
 import { Utensils, Check, ChevronRight } from 'lucide-react'
 
 const Diet: React.FC = () => {
   const { currentPlan } = useFitnessPlanStore()
+  const { currentPlan: currentDietPlan, createPlan: createDietPlan, getPlans: getDietPlans } = useDietPlanStore()
+  const { records: dietRecords, addRecord: addDietRecord, getRecords: getDietRecords } = useDietRecordStore()
   const [selectedDay, setSelectedDay] = useState(new Date())
-  const [dietRecords, setDietRecords] = useState<{[key: string]: boolean}>({})
+  const [localDietRecords, setLocalDietRecords] = useState<{[key: string]: boolean}>({})
 
   // 模拟饮食计划数据
   const dietPlans = {
@@ -35,12 +37,44 @@ const Diet: React.FC = () => {
     return days[date.getDay()]
   }
 
-  const handleDietComplete = (mealType: string) => {
-    const key = `${selectedDay.toISOString().split('T')[0]}_${mealType}`
-    setDietRecords(prev => ({
+  useEffect(() => {
+    const loadData = async () => {
+      // 获取饮食计划
+      await getDietPlans()
+      // 获取饮食记录
+      await getDietRecords()
+      
+      // 初始化本地记录状态
+      const recordsMap: {[key: string]: boolean} = {}
+      dietRecords.forEach(record => {
+        const key = `${record.date}_${record.meal_type}`
+        recordsMap[key] = true
+      })
+      setLocalDietRecords(recordsMap)
+    }
+    
+    loadData()
+  }, [getDietPlans, getDietRecords, dietRecords])
+
+  const handleDietComplete = async (mealType: string) => {
+    const date = selectedDay.toISOString().split('T')[0]
+    const key = `${date}_${mealType}`
+    const newStatus = !localDietRecords[key]
+    
+    // 更新本地状态
+    setLocalDietRecords(prev => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: newStatus
     }))
+    
+    // 如果标记为完成，保存到数据库
+    if (newStatus) {
+      await addDietRecord({
+        date,
+        meal_type: mealType,
+        status: true
+      })
+    }
   }
 
   return (
@@ -80,14 +114,14 @@ const Diet: React.FC = () => {
                   onClick={() => handleDietComplete('breakfast')}
                   className={cn(
                     'flex items-center space-x-1 px-3 py-1 rounded-md transition-colors',
-                    dietRecords[`${selectedDay.toISOString().split('T')[0]}_breakfast`]
+                    localDietRecords[`${selectedDay.toISOString().split('T')[0]}_breakfast`]
                       ? 'bg-green-100 text-green-700'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   )}
                 >
                   <Check size={16} />
                   <span>
-                    {dietRecords[`${selectedDay.toISOString().split('T')[0]}_breakfast`] ? '已完成' : '标记完成'}
+                    {localDietRecords[`${selectedDay.toISOString().split('T')[0]}_breakfast`] ? '已完成' : '标记完成'}
                   </span>
                 </button>
               </div>
@@ -114,14 +148,14 @@ const Diet: React.FC = () => {
                   onClick={() => handleDietComplete('lunch')}
                   className={cn(
                     'flex items-center space-x-1 px-3 py-1 rounded-md transition-colors',
-                    dietRecords[`${selectedDay.toISOString().split('T')[0]}_lunch`]
+                    localDietRecords[`${selectedDay.toISOString().split('T')[0]}_lunch`]
                       ? 'bg-green-100 text-green-700'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   )}
                 >
                   <Check size={16} />
                   <span>
-                    {dietRecords[`${selectedDay.toISOString().split('T')[0]}_lunch`] ? '已完成' : '标记完成'}
+                    {localDietRecords[`${selectedDay.toISOString().split('T')[0]}_lunch`] ? '已完成' : '标记完成'}
                   </span>
                 </button>
               </div>
@@ -148,14 +182,14 @@ const Diet: React.FC = () => {
                   onClick={() => handleDietComplete('dinner')}
                   className={cn(
                     'flex items-center space-x-1 px-3 py-1 rounded-md transition-colors',
-                    dietRecords[`${selectedDay.toISOString().split('T')[0]}_dinner`]
+                    localDietRecords[`${selectedDay.toISOString().split('T')[0]}_dinner`]
                       ? 'bg-green-100 text-green-700'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   )}
                 >
                   <Check size={16} />
                   <span>
-                    {dietRecords[`${selectedDay.toISOString().split('T')[0]}_dinner`] ? '已完成' : '标记完成'}
+                    {localDietRecords[`${selectedDay.toISOString().split('T')[0]}_dinner`] ? '已完成' : '标记完成'}
                   </span>
                 </button>
               </div>
