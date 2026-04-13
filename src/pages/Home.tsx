@@ -68,28 +68,19 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 功能卡片 */}
-      <section>
-        <h2 className="text-2xl font-bold mb-8 text-center">核心功能</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <Link
-              key={index}
-              to={feature.link}
-              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-100"
-            >
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       {/* 计划状态 */}
       {currentPlan && (
         <section className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-          <h2 className="text-2xl font-bold mb-4">当前计划</h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <h2 className="text-2xl font-bold">当前计划</h2>
+            <Link
+              to="/track"
+              className="mt-2 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
+            >
+              继续锻炼
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="text-sm font-medium text-blue-800 mb-1">计划名称</h3>
@@ -115,6 +106,24 @@ const Home: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* 功能卡片 */}
+      <section>
+        <h2 className="text-2xl font-bold mb-8 text-center">核心功能</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <Link
+              key={index}
+              to={feature.link}
+              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-100"
+            >
+              <div className="mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* 管理员提示 */}
       {isAdmin && (
