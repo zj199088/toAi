@@ -101,12 +101,21 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
   checkAuth: async () => {
+    // 立即设置加载状态
+    set({ isLoading: true, error: null })
+    
     try {
-      // 立即设置加载状态
-      set({ isLoading: true, error: null })
-      
       // 首先尝试从Supabase获取当前用户会话
-      const { data, error: authError } = await supabase.auth.getUser()
+      // 设置超时，防止Supabase连接卡住
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('连接超时')), 5000)
+      })
+      
+      const result = await Promise.race([
+        supabase.auth.getUser(),
+        timeoutPromise
+      ]) as { data: { user: any } | null; error: any }
+      const { data, error: authError } = result
       
       if (data?.user) {
         // 从Supabase获取到用户信息

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useUserStore } from './store'
 import Layout from './components/Layout'
@@ -13,7 +13,19 @@ import AdminTemplates from './pages/admin/Templates'
 import AdminStats from './pages/admin/Stats'
 
 export default function App() {
-  const { isAdmin, isLoading } = useUserStore()
+  const { isAdmin, isLoading, user } = useUserStore()
+
+  // 防止无限加载：如果isLoading超过10秒，强制设置为false
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        // 这里我们无法直接修改useUserStore的状态
+        // 但可以在控制台输出警告
+        console.warn('加载时间过长，可能是Supabase连接问题')
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [isLoading])
 
   if (isLoading) {
     return (
@@ -21,6 +33,7 @@ export default function App() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">加载中...</p>
+          <p className="text-sm text-gray-400 mt-2">如果长时间无响应，请检查网络连接</p>
         </div>
       </div>
     )
