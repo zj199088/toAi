@@ -44,7 +44,6 @@ const Track: React.FC = () => {
 
     loadData()
   }, [user, getPlans, setCurrentPlan, getRecords, getMeasurements])
-
   // 模拟训练计划数据
   const workoutSchedule = [
     { day: 1, type: '胸+核心', exercises: ['标准俯卧撑', '卷腹', '平板支撑', '俄罗斯转体'] },
