@@ -22,6 +22,8 @@ const Track: React.FC = () => {
     arm: '',
     leg: ''
   })
+  // 防抖状态，用于防止重复点击
+  const [isSubmitting, setIsSubmitting] = useState<Record<string, boolean>>({})
 
   // 组件加载时获取数据
   useEffect(() => {
@@ -224,6 +226,12 @@ const Track: React.FC = () => {
 
   // 当练习全部完成时添加记录
   const handleExerciseComplete = async (exerciseName: string) => {
+    // 检查是否正在提交，防止重复点击
+    if (isSubmitting[exerciseName]) {
+      console.log('⚠️ 正在处理，请勿重复点击:', exerciseName)
+      return
+    }
+
     console.log('🎯 handleExerciseComplete 被调用，练习名称:', exerciseName)
     console.log('👤 用户信息:', user)
     console.log('📋 当前计划:', currentPlan)
@@ -236,6 +244,12 @@ const Track: React.FC = () => {
     // 只有当所有组都完成时才添加记录
     if (isExerciseComplete(exerciseName)) {
       console.log('✅ 所有组都已完成，准备添加记录')
+      
+      // 设置提交状态
+      setIsSubmitting(prev => ({
+        ...prev,
+        [exerciseName]: true
+      }))
       
       // 生成 UUID
       const generateUUID = () => {
@@ -346,6 +360,12 @@ const Track: React.FC = () => {
         }
       } catch (error) {
         console.error('❌ 处理锻炼记录失败:', error)
+      } finally {
+        // 无论成功还是失败，都重置提交状态
+        setIsSubmitting(prev => ({
+          ...prev,
+          [exerciseName]: false
+        }))
       }
     } else {
       console.log('⚠️ 并非所有组都完成，不添加记录')
@@ -363,28 +383,43 @@ const Track: React.FC = () => {
     return setIndex === lastSetIndex + 1
   }
 
-  const handleBodyMeasurementSubmit = (e: React.FormEvent) => {
+  // 身体数据提交状态
+  const [isSubmittingBodyMeasurement, setIsSubmittingBodyMeasurement] = useState(false)
+
+  const handleBodyMeasurementSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addMeasurement({
-      user_id: user?.id || 'user123',
-      date: new Date().toISOString().split('T')[0],
-      weight: parseFloat(bodyMeasurement.weight),
-      waist: parseFloat(bodyMeasurement.waist),
-      hip: parseFloat(bodyMeasurement.hip),
-      chest: parseFloat(bodyMeasurement.chest),
-      arm: parseFloat(bodyMeasurement.arm),
-      leg: parseFloat(bodyMeasurement.leg),
-      created_at: new Date().toISOString()
-    })
-    setShowBodyMeasurementForm(false)
-    setBodyMeasurement({
-      weight: '',
-      waist: '',
-      hip: '',
-      chest: '',
-      arm: '',
-      leg: ''
-    })
+    
+    if (isSubmittingBodyMeasurement) {
+      return
+    }
+    
+    setIsSubmittingBodyMeasurement(true)
+    try {
+      await addMeasurement({
+        user_id: user?.id || 'user123',
+        date: new Date().toISOString().split('T')[0],
+        weight: parseFloat(bodyMeasurement.weight),
+        waist: parseFloat(bodyMeasurement.waist),
+        hip: parseFloat(bodyMeasurement.hip),
+        chest: parseFloat(bodyMeasurement.chest),
+        arm: parseFloat(bodyMeasurement.arm),
+        leg: parseFloat(bodyMeasurement.leg),
+        created_at: new Date().toISOString()
+      })
+      setShowBodyMeasurementForm(false)
+      setBodyMeasurement({
+        weight: '',
+        waist: '',
+        hip: '',
+        chest: '',
+        arm: '',
+        leg: ''
+      })
+    } catch (error) {
+      console.error('添加身体数据失败:', error)
+    } finally {
+      setIsSubmittingBodyMeasurement(false)
+    }
   }
 
   const currentWorkout = getCurrentWorkout()
@@ -498,29 +533,39 @@ const Track: React.FC = () => {
                                     </button>
                                   )}
                                   <button
-                                    onClick={() => handleExerciseComplete(exercise.name)}
-                                    disabled={!exerciseComplete}
-                                    className={cn(
-                                      'flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm',
-                                      hasRecord
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/40'
-                                        : exerciseComplete
-                                        ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/40 transform hover:scale-105'
-                                        : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
-                                    )}
-                                  >
-                                    {hasRecord ? (
-                                      <>
-                                        <Check size={20} />
-                                        <span>再做一次</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Check size={20} />
-                                        <span>完成练习</span>
-                                      </>
-                                    )}
-                                  </button>
+                                  onClick={() => handleExerciseComplete(exercise.name)}
+                                  disabled={!exerciseComplete || isSubmitting[exercise.name]}
+                                  className={cn(
+                                    'flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm',
+                                    isSubmitting[exercise.name]
+                                      ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
+                                      : hasRecord
+                                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/40'
+                                      : exerciseComplete
+                                      ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/40 transform hover:scale-105'
+                                      : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
+                                  )}
+                                >
+                                  {isSubmitting[exercise.name] ? (
+                                    <>
+                                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      <span>处理中...</span>
+                                    </>
+                                  ) : hasRecord ? (
+                                    <>
+                                      <Check size={20} />
+                                      <span>再做一次</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Check size={20} />
+                                      <span>完成练习</span>
+                                    </>
+                                  )}
+                                </button>
                                 </div>
                               </div>
                               <div className="flex space-x-3">
@@ -742,9 +787,25 @@ const Track: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 px-6 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 font-bold shadow-lg shadow-green-500/40"
+                    disabled={isSubmittingBodyMeasurement}
+                    className={cn(
+                      'flex-1 py-3 px-6 font-bold rounded-xl transition-all duration-300',
+                      isSubmittingBodyMeasurement
+                        ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
+                        : 'bg-gradient-to-r from-green-500 to-teal-600 text-white hover:from-green-600 hover:to-teal-700 shadow-lg shadow-green-500/40'
+                    )}
                   >
-                    保存
+                    {isSubmittingBodyMeasurement ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        保存中...
+                      </div>
+                    ) : (
+                      '保存'
+                    )}
                   </button>
                 </div>
               </form>
