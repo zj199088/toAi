@@ -1,20 +1,19 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store'
 import { cn } from '../utils/cn'
-import { Mail, Lock, User, MessageSquare } from 'lucide-react'
+import { Mail, Lock, User, MessageSquare, Loader2 } from 'lucide-react'
 
 const Login: React.FC = () => {
-  const navigate = useNavigate()
   const { signUp, signIn, signInWithWechat, error, isLoading } = useUserStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [name, setName] = useState('')
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isLoading) return
+    if (isLoading || isRedirecting) return
     
     let success = false
     if (isRegistering) {
@@ -24,14 +23,15 @@ const Login: React.FC = () => {
     }
     
     if (success) {
+      setIsRedirecting(true)
       setTimeout(() => {
-        navigate('/')
-      }, 50)
+        window.location.href = '/'
+      }, 100)
     }
   }
 
   const handleWechatLogin = async () => {
-    if (isLoading) return
+    if (isLoading || isRedirecting) return
     
     const mockWechatInfo = {
       openid: 'mock_openid_123',
@@ -41,14 +41,24 @@ const Login: React.FC = () => {
     const success = await signInWithWechat(mockWechatInfo)
     
     if (success) {
+      setIsRedirecting(true)
       setTimeout(() => {
-        navigate('/')
-      }, 50)
+        window.location.href = '/'
+      }, 100)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-green-400 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-green-400 p-4 relative">
+      {/* 跳转中的全屏加载状态 */}
+      {isRedirecting && (
+        <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-50">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <p className="text-xl font-semibold text-gray-700">登录成功！正在跳转...</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-green-500 py-6 px-8">
           <h2 className="text-2xl font-bold text-white text-center">
@@ -118,10 +128,17 @@ const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || isRedirecting}
+                className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isLoading ? '处理中...' : isRegistering ? '注册' : '登录'}
+                {(isLoading || isRedirecting) ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    {isRedirecting ? '跳转中...' : '处理中...'}
+                  </>
+                ) : (
+                  isRegistering ? '注册' : '登录'
+                )}
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -149,11 +166,20 @@ const Login: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleWechatLogin}
-                disabled={isLoading}
+                disabled={isLoading || isRedirecting}
                 className="w-full flex items-center justify-center space-x-2 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <MessageSquare size={18} />
-                <span>{isLoading ? '处理中...' : '微信登录'}</span>
+                {(isLoading || isRedirecting) ? (
+                  <>
+                    <Loader2 className="animate-spin" size={18} />
+                    <span>{isRedirecting ? '跳转中...' : '处理中...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare size={18} />
+                    <span>微信登录</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
