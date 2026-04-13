@@ -50,7 +50,7 @@ export const useUserStore = create<UserState>((set) => ({
       const isAdmin = email.includes('admin') || false
       localStorage.setItem('user', JSON.stringify(user))
       localStorage.setItem('isAdmin', isAdmin.toString())
-      set({ user, isAdmin, isLoading: false })
+      set({ user, isAdmin, isLoading: false, error: null })
       return true
     } catch (error) {
       console.error('注册失败:', error)
@@ -83,7 +83,7 @@ export const useUserStore = create<UserState>((set) => ({
       const isAdmin = email.includes('admin') || false
       localStorage.setItem('user', JSON.stringify(user))
       localStorage.setItem('isAdmin', isAdmin.toString())
-      set({ user, isAdmin, isLoading: false })
+      set({ user, isAdmin, isLoading: false, error: null })
       return true
     } catch (error) {
       console.error('登录失败:', error)
@@ -162,7 +162,8 @@ export const useUserStore = create<UserState>((set) => ({
       set({ 
         user,
         isAdmin: false,
-        isLoading: false 
+        isLoading: false,
+        error: null
       })
       return true
     } catch (error) {
