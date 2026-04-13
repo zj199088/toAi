@@ -3,7 +3,7 @@ import { useFitnessPlanStore, useWorkoutRecordStore, useBodyMeasurementStore, us
 import { cn } from '../utils/cn'
 import { supabase } from '../lib/supabase'
 import { 
-  Check, Calendar, BarChart3, Activity, ChevronRight, Plus, Edit,
+  Check, Calendar, BarChart3, Activity, ChevronRight, Plus, Edit, RotateCcw,
   Zap, Timer, Dumbbell, Flame, Trophy, HeartPulse, Target
 } from 'lucide-react'
 
@@ -208,6 +208,18 @@ const Track: React.FC = () => {
   const isExerciseComplete = (exerciseName: string) => {
     const sets = exerciseSets[exerciseName]
     return sets && sets.every(set => set)
+  }
+
+  // 重置练习的完成状态
+  const resetExercise = (exerciseName: string, setsCount: number = 3) => {
+    setExerciseSets(prev => ({
+      ...prev,
+      [exerciseName]: Array(setsCount).fill(false)
+    }))
+    setLastCompletedSetIndex(prev => ({
+      ...prev,
+      [exerciseName]: -1
+    }))
   }
 
   // 当练习全部完成时添加记录
@@ -440,7 +452,7 @@ const Track: React.FC = () => {
                     {currentWorkout.exercises.length > 0 ? (
                       <div className="space-y-5">
                         {currentWorkout.exercises.map((exercise, index) => {
-                          const isCompleted = records.some(r => 
+                          const hasRecord = records.some(r => 
                             r.exercise_id === `exercise_${exercise.name}` && 
                             r.date === selectedDay.toISOString().split('T')[0]
                           )
@@ -475,30 +487,41 @@ const Track: React.FC = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <button
-                                  onClick={() => handleExerciseComplete(exercise.name)}
-                                  disabled={isCompleted || !exerciseComplete}
-                                  className={cn(
-                                    'flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm',
-                                    isCompleted
-                                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/40'
-                                      : exerciseComplete
-                                      ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/40 transform hover:scale-105'
-                                      : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
+                                <div className="flex items-center space-x-3">
+                                  {(exerciseComplete || hasRecord) && (
+                                    <button
+                                      onClick={() => resetExercise(exercise.name, exercise.sets)}
+                                      className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/40 transform hover:scale-105"
+                                    >
+                                      <RotateCcw size={20} />
+                                      <span>重置</span>
+                                    </button>
                                   )}
-                                >
-                                  {isCompleted ? (
-                                    <>
-                                      <Check size={20} />
-                                      <span>已完成</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Check size={20} />
-                                      <span>完成练习</span>
-                                    </>
-                                  )}
-                                </button>
+                                  <button
+                                    onClick={() => handleExerciseComplete(exercise.name)}
+                                    disabled={!exerciseComplete}
+                                    className={cn(
+                                      'flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm',
+                                      hasRecord
+                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/40'
+                                        : exerciseComplete
+                                        ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/40 transform hover:scale-105'
+                                        : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
+                                    )}
+                                  >
+                                    {hasRecord ? (
+                                      <>
+                                        <Check size={20} />
+                                        <span>再做一次</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Check size={20} />
+                                        <span>完成练习</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
                               </div>
                               <div className="flex space-x-3">
                                 {sets.map((setComplete, setIndex) => {
@@ -507,10 +530,10 @@ const Track: React.FC = () => {
                                   <button
                                     key={setIndex}
                                     onClick={() => toggleSetComplete(exercise.name, setIndex)}
-                                    disabled={isCompleted || !clickable}
+                                    disabled={!clickable}
                                     className={cn(
                                       'flex-1 py-4 rounded-xl transition-all duration-300 text-center font-bold relative overflow-hidden',
-                                      isCompleted || !clickable
+                                      !clickable
                                         ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-500 border-2 border-slate-600 cursor-not-allowed'
                                         : setComplete
                                         ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-2 border-green-400 shadow-lg shadow-green-500/40'
