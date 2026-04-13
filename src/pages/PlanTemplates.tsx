@@ -17,25 +17,57 @@ const PlanTemplates: React.FC = () => {
       id: 'beginner',
       name: '基础健身模板',
       description: '适合健身新手，包含基础动作和循序渐进的训练计划',
-      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20beginner%20workout%20blue%20cyberpunk%20style&image_size=landscape_16_9'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20beginner%20workout%20blue%20cyberpunk%20style&image_size=landscape_16_9',
+      exercises: [
+        { name: '标准俯卧撑', sets: 3, reps: 10-15 },
+        { name: '卷腹', sets: 3, reps: 15-20 },
+        { name: '平板支撑', sets: 3, duration: '30-45秒' },
+        { name: '深蹲', sets: 3, reps: 12-15 },
+        { name: '弓步蹲', sets: 3, reps: 10-12, note: '每侧' },
+        { name: '臀桥', sets: 3, reps: 15-20 }
+      ]
     },
     {
       id: 'fat-loss',
       name: '减脂专项模板',
       description: '专注于减脂，结合有氧运动和力量训练',
-      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20fat%20loss%20workout%20green%20cyberpunk%20style&image_size=landscape_16_9'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20fat%20loss%20workout%20green%20cyberpunk%20style&image_size=landscape_16_9',
+      exercises: [
+        { name: '高抬腿', sets: 4, duration: '30秒' },
+        { name: '开合跳', sets: 4, duration: '30秒' },
+        { name: '俯卧撑', sets: 3, reps: 12-15 },
+        { name: '登山跑', sets: 4, duration: '30秒' },
+        { name: '深蹲跳', sets: 3, reps: 10-12 },
+        { name: '平板支撑', sets: 3, duration: '45-60秒' }
+      ]
     },
     {
       id: 'muscle-gain',
       name: '增肌强化模板',
       description: '针对增肌目标，包含大重量训练和营养建议',
-      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20muscle%20gain%20workout%20purple%20cyberpunk%20style&image_size=landscape_16_9'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20muscle%20gain%20workout%20purple%20cyberpunk%20style&image_size=landscape_16_9',
+      exercises: [
+        { name: '卧推', sets: 4, reps: 8-10, note: '逐渐增加重量' },
+        { name: '硬拉', sets: 4, reps: 6-8, note: '保持正确姿势' },
+        { name: '深蹲', sets: 4, reps: 8-10, note: '大重量' },
+        { name: '引体向上', sets: 4, reps: 6-8, note: '可使用助力带' },
+        { name: '哑铃弯举', sets: 3, reps: 10-12 },
+        { name: '三头下压', sets: 3, reps: 10-12 }
+      ]
     },
     {
       id: 'body-shaping',
       name: '全身塑形模板',
       description: '塑造全身线条，提升整体体态',
-      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20body%20shaping%20workout%20orange%20cyberpunk%20style&image_size=landscape_16_9'
+      image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fitness%20technology%20body%20shaping%20workout%20orange%20cyberpunk%20style&image_size=landscape_16_9',
+      exercises: [
+        { name: '侧平板支撑', sets: 3, duration: '30-45秒', note: '每侧' },
+        { name: '哑铃肩推', sets: 3, reps: 12-15 },
+        { name: '罗马尼亚硬拉', sets: 3, reps: 12-15 },
+        { name: '仰卧起坐', sets: 3, reps: 20-25 },
+        { name: '侧平举', sets: 3, reps: 12-15 },
+        { name: '单腿臀桥', sets: 3, reps: 10-12, note: '每侧' }
+      ]
     }
   ]
 
@@ -95,6 +127,21 @@ const PlanTemplates: React.FC = () => {
             <div className="p-6">
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-600 text-sm mb-4">{template.description}</p>
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">锻炼内容</h4>
+                <div className="space-y-2">
+                  {template.exercises?.map((exercise, index) => (
+                    <div key={index} className="text-xs text-gray-600 flex flex-wrap items-center">
+                      <span className="w-1/3 truncate">{exercise.name}</span>
+                      <span className="w-1/3 text-center">{exercise.sets} 组</span>
+                      <span className="w-1/3 text-right">
+                        {exercise.reps ? `${exercise.reps} 次` : `${exercise.duration}`}
+                        {exercise.note && <span className="ml-1 text-gray-500">({exercise.note})</span>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ))}
