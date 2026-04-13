@@ -101,8 +101,8 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
   checkAuth: async () => {
-    set({ isLoading: true })
     try {
+      set({ isLoading: true })
       // 实际从Supabase检查认证状态
       const { data: { session } } = await supabase.auth.getSession()
       
@@ -136,6 +136,7 @@ export const useUserStore = create<UserState>((set) => ({
       }
     } catch (error) {
       console.error('认证检查失败:', error)
+      // 即使出错，也要确保设置isLoading为false
       set({ user: null, isAdmin: false, isLoading: false })
     }
   },
