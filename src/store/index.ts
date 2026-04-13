@@ -104,63 +104,27 @@ export const useUserStore = create<UserState>((set) => ({
     // 立即设置加载状态
     set({ isLoading: true, error: null })
     
+    // 简化版本：只从localStorage获取用户信息，不尝试连接Supabase
+    // 这样可以避免因Supabase连接问题导致的加载卡住
     try {
-      // 首先尝试从Supabase获取当前用户会话
-      // 设置超时，防止Supabase连接卡住
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('连接超时')), 5000)
-      })
+      const storedUser = localStorage.getItem('user')
+      const storedIsAdmin = localStorage.getItem('isAdmin')
       
-      const result = await Promise.race([
-        supabase.auth.getUser(),
-        timeoutPromise
-      ]) as { data: { user: any } | null; error: any }
-      const { data, error: authError } = result
-      
-      if (data?.user) {
-        // 从Supabase获取到用户信息
-        const userData = {
-          id: data.user.id,
-          email: data.user.email,
-          user_metadata: {
-            name: data.user.user_metadata?.name || data.user.email?.split('@')[0],
-            displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0],
-            ...data.user.user_metadata
-          }
-        }
-        const isAdmin = data.user.email?.includes('admin') || false
-        
-        // 更新localStorage
-        localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('isAdmin', isAdmin.toString())
-        
+      if (storedUser) {
         set({ 
-          user: userData, 
-          isAdmin, 
+          user: JSON.parse(storedUser), 
+          isAdmin: storedIsAdmin === 'true', 
           isLoading: false, 
           error: null
         })
       } else {
-        // 没有从Supabase获取到用户信息，检查localStorage
-        const storedUser = localStorage.getItem('user')
-        const storedIsAdmin = localStorage.getItem('isAdmin')
-        
-        if (storedUser) {
-          set({ 
-            user: JSON.parse(storedUser), 
-            isAdmin: storedIsAdmin === 'true', 
-            isLoading: false, 
-            error: null
-          })
-        } else {
-          // 没有本地存储的用户信息，直接设置为未登录状态
-          set({ 
-            user: null, 
-            isAdmin: false, 
-            isLoading: false, 
-            error: null
-          })
-        }
+        // 没有本地存储的用户信息，直接设置为未登录状态
+        set({ 
+          user: null, 
+          isAdmin: false, 
+          isLoading: false, 
+          error: null
+        })
       }
     } catch (error) {
       console.error('认证检查失败:', error)
