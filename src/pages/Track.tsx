@@ -222,7 +222,7 @@ const Track: React.FC = () => {
     if (isExerciseComplete(exerciseName)) {
       console.log('✅ 所有组都已完成，准备添加记录')
       
-      // 生成 UUID 作为 exercise_id
+      // 生成 UUID
       const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
           const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -233,7 +233,7 @@ const Track: React.FC = () => {
       const record = {
         user_id: user?.id || user?.user_metadata?.id || 'user123',
         plan_id: currentPlan.id,
-        schedule_id: 'schedule123',
+        schedule_id: generateUUID(),
         exercise_id: generateUUID(),
         date: selectedDay.toISOString().split('T')[0],
         sets_completed: 3,
