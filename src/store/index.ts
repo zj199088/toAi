@@ -101,11 +101,11 @@ export const useUserStore = create<UserState>((set) => ({
     }
   },
   checkAuth: async () => {
-    // 立即设置加载状态
-    set({ isLoading: true, error: null })
-    
     try {
-      // 先尝试从localStorage获取用户信息
+      // 立即设置加载状态
+      set({ isLoading: true, error: null })
+      
+      // 简化版本：只从localStorage获取用户信息，不尝试连接Supabase
       const storedUser = localStorage.getItem('user')
       const storedIsAdmin = localStorage.getItem('isAdmin')
       
@@ -116,60 +116,14 @@ export const useUserStore = create<UserState>((set) => ({
           isLoading: false, 
           error: null
         })
-        return
-      }
-      
-      // 直接尝试从Supabase获取用户信息，使用try-catch处理错误
-      try {
-        const { data, error: supabaseError } = await supabase.auth.getUser()
-        
-        if (supabaseError) {
-          console.error('从Supabase获取用户信息失败:', supabaseError)
-          set({ 
-            user: null, 
-            isAdmin: false, 
-            isLoading: false, 
-            error: '连接服务器失败，请稍后重试'
-          })
-          return
-        }
-        
-        if (data.user) {
-          const user = {
-            id: data.user.id,
-            email: data.user.email || '',
-            user_metadata: {
-              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
-              displayName: data.user.user_metadata?.displayName || data.user.user_metadata?.name || data.user.email?.split('@')[0] || '',
-              ...data.user.user_metadata
-            }
-          }
-          const isAdmin = data.user.email?.includes('admin') || false
-          localStorage.setItem('user', JSON.stringify(user))
-          localStorage.setItem('isAdmin', isAdmin.toString())
-          set({ 
-            user, 
-            isAdmin, 
-            isLoading: false, 
-            error: null
-          })
-        } else {
-          set({ 
-            user: null, 
-            isAdmin: false, 
-            isLoading: false, 
-            error: null
-          })
-        }
-      } catch (supabaseError) {
-        console.error('从Supabase获取用户信息失败:', supabaseError)
+      } else {
+        // 没有本地存储的用户信息，直接设置为未登录状态
         set({ 
           user: null, 
           isAdmin: false, 
           isLoading: false, 
-          error: '连接服务器失败，请稍后重试'
+          error: null
         })
-        return
       }
     } catch (error) {
       console.error('认证检查失败:', error)
