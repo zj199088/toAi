@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react'
-import { useWorkoutRecordStore } from '../store'
+import { useWorkoutRecordStore, useFitnessPlanStore } from '../store'
 import { supabase } from '../lib/supabase'
 import { Activity, Calendar, Dumbbell, Zap, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const WorkoutRecords: React.FC = () => {
   const { records, isLoading, error, getRecords } = useWorkoutRecordStore()
+  const { currentPlan, getPlans } = useFitnessPlanStore()
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage] = useState(10)
   const [exerciseMap, setExerciseMap] = useState<Record<string, string>>({})
   const [loadingExercises, setLoadingExercises] = useState(true)
 
   useEffect(() => {
-    // 这里应该从当前计划获取 planId
-    // 暂时使用一个默认值，实际项目中应该从状态中获取
-    const planId = 'plan123'
-    getRecords(planId)
-  }, [getRecords])
+    // 首先获取健身计划
+    const loadData = async () => {
+      await getPlans()
+    }
+    loadData()
+  }, [getPlans])
+
+  useEffect(() => {
+    // 当有当前计划时，获取锻炼记录
+    if (currentPlan) {
+      console.log('✅ 获取当前计划的锻炼记录，planId:', currentPlan.id)
+      getRecords(currentPlan.id)
+    } else {
+      console.log('⚠️ 没有当前计划')
+    }
+  }, [currentPlan, getRecords])
 
   useEffect(() => {
     // 获取所有锻炼动作，构建映射表
