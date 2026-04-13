@@ -1,15 +1,15 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 
-const checkAuthAndRedirect = () => {
+const checkAuthAndRedirect = (shouldRedirect = true) => {
   const storedUser = localStorage.getItem('user')
-  if (!storedUser) {
+  if (!storedUser && shouldRedirect) {
     if (typeof window !== 'undefined') {
       window.location.href = '/login'
     }
     return false
   }
-  return true
+  return !!storedUser
 }
 
 interface UserState {
@@ -476,7 +476,10 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
     }
   },
   getRecords: async (planId, limit) => {
-    if (!checkAuthAndRedirect()) return
+    if (!checkAuthAndRedirect(false)) {
+      set({ records: [], isLoading: false })
+      return
+    }
     console.log('🔄 开始获取锻炼记录，planId:', planId, 'limit:', limit)
     set({ isLoading: true, error: null })
     try {
@@ -521,7 +524,10 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
     }
   },
   getTotalCountLastYear: async () => {
-    if (!checkAuthAndRedirect()) return
+    if (!checkAuthAndRedirect(false)) {
+      set({ totalCountLastYear: 0, isLoading: false })
+      return
+    }
     console.log('🔄 开始获取最近1年锻炼记录总数')
     set({ isLoading: true, error: null })
     try {
@@ -720,7 +726,10 @@ export const useDietPlanStore = create<DietPlanState>((set) => ({
     }
   },
   getPlans: async () => {
-    if (!checkAuthAndRedirect()) return
+    if (!checkAuthAndRedirect(false)) {
+      set({ plans: [], currentPlan: null, isLoading: false })
+      return
+    }
     set({ isLoading: true, error: null })
     try {
       // 获取当前用户

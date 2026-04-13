@@ -55,11 +55,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
-          <ProtectedRoute>
-            <Layout>
-              <Home />
-            </Layout>
-          </ProtectedRoute>
+          <Layout>
+            <Home />
+          </Layout>
         } />
         <Route path="/plan/generate" element={
           <ProtectedRoute>

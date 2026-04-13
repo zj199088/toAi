@@ -15,6 +15,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const loadPlans = async () => {
+      if (!user) return
       setLoadingPlans(true)
       try {
         await getPlans()
@@ -26,13 +27,13 @@ const Home: React.FC = () => {
     }
     
     loadPlans()
-  }, [getPlans])
+  }, [getPlans, user])
 
   useEffect(() => {
-    if (currentPlan) {
+    if (user && currentPlan) {
       getRecords(currentPlan.id, 3)
     }
-  }, [currentPlan, getRecords])
+  }, [currentPlan, getRecords, user])
 
   useEffect(() => {
     if (user) {
@@ -43,6 +44,10 @@ const Home: React.FC = () => {
   useEffect(() => {
     // 获取所有锻炼动作，构建映射表
     const fetchExercises = async () => {
+      if (!user) {
+        setLoadingExercises(false)
+        return
+      }
       setLoadingExercises(true)
       try {
         const { data: exercises, error } = await supabase
@@ -67,7 +72,7 @@ const Home: React.FC = () => {
     }
 
     fetchExercises()
-  }, [])
+  }, [user])
 
   const features = [
     {
