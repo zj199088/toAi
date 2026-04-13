@@ -229,19 +229,27 @@ interface WorkoutRecordState {
 }
 
 export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
-  records: typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : [],
+  records: [],
   isLoading: false,
   error: null,
   addRecord: async (record) => {
     set({ isLoading: true, error: null })
     try {
-      // 使用localStorage保存锻炼记录
-      const newRecord = { ...record, id: Date.now().toString() }
-      const storedRecords = typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : []
-      const updatedRecords = [...storedRecords, newRecord]
-      localStorage.setItem('workoutRecords', JSON.stringify(updatedRecords))
+      // 保存到Supabase数据库
+      const { data, error } = await supabase
+        .from('workout_records')
+        .insert({
+          ...record,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        throw error
+      }
+
       set((state) => ({ 
-        records: updatedRecords,
+        records: [...state.records, data[0]],
         isLoading: false 
       }))
     } catch (error) {
@@ -252,10 +260,18 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
   getRecords: async (planId) => {
     set({ isLoading: true, error: null })
     try {
-      // 从localStorage获取锻炼记录
-      const storedRecords = typeof window !== 'undefined' && localStorage.getItem('workoutRecords') ? JSON.parse(localStorage.getItem('workoutRecords')!) : []
-      const filteredRecords = storedRecords.filter((r: any) => r.plan_id === planId)
-      set({ records: filteredRecords, isLoading: false })
+      // 从Supabase数据库获取锻炼记录
+      const { data, error } = await supabase
+        .from('workout_records')
+        .select('*')
+        .eq('plan_id', planId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      set({ records: data || [], isLoading: false })
     } catch (error) {
       console.error('获取锻炼记录失败:', error)
       set({ error: '获取锻炼记录失败，请稍后重试', isLoading: false })

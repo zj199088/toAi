@@ -1,11 +1,45 @@
-import React from 'react'
-import { useUserStore, useFitnessPlanStore } from '../store'
+import React, { useEffect, useState } from 'react'
+import { useUserStore, useFitnessPlanStore, useWorkoutRecordStore } from '../store'
 import { Link } from 'react-router-dom'
-import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer } from 'lucide-react'
+import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer, Plus, Trash2, Edit } from 'lucide-react'
 
 const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
   const { currentPlan } = useFitnessPlanStore()
+  const { records, isLoading, error, addRecord, getRecords } = useWorkoutRecordStore()
+  const [newRecord, setNewRecord] = useState({
+    exercise: '',
+    sets: 0,
+    reps: 0,
+    weight: 0,
+    duration: 0
+  })
+
+  useEffect(() => {
+    if (currentPlan) {
+      getRecords(currentPlan.id)
+    }
+  }, [currentPlan, getRecords])
+
+  const handleAddRecord = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentPlan || !newRecord.exercise) return
+
+    await addRecord({
+      ...newRecord,
+      plan_id: currentPlan.id,
+      user_id: user?.id || 'anonymous',
+      date: new Date().toISOString()
+    })
+
+    setNewRecord({
+      exercise: '',
+      sets: 0,
+      reps: 0,
+      weight: 0,
+      duration: 0
+    })
+  }
 
   const features = [
     {
@@ -51,65 +85,185 @@ const Home: React.FC = () => {
 
       {/* 计划状态 */}
       {currentPlan && (
-        <section className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-8 border border-cyan-500/30 overflow-hidden relative animate-fade-in">
-          {/* 背景装饰 */}
-          <div className="absolute top-0 left-0 w-full h-full opacity-10">
-            <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-            <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-          </div>
-          
-          {/* 网格线背景 */}
-          <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-          
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center group">
+        <>
+          <section className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-8 border border-cyan-500/30 overflow-hidden relative animate-fade-in">
+            {/* 背景装饰 */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+              <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+            </div>
+            
+            {/* 网格线背景 */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+            
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center group">
+                  <Activity className="h-6 w-6 mr-3 text-cyan-400 animate-pulse" />
+                  当前计划
+                  <span className="ml-3 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-xs text-cyan-300 font-medium animate-pulse">进行中</span>
+                </h2>
+                <Link
+                  to="/track"
+                  className="mt-3 md:mt-0 px-8 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-bold hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-cyan-500/40 transform hover:scale-105 flex items-center group"
+                >
+                  继续锻炼
+                  <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                  <h3 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-cyan-400" />
+                    计划名称
+                  </h3>
+                  <p className="text-xl font-bold text-white animate-fade-in">{currentPlan.name}</p>
+                </div>
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-green-500/20 shadow-xl hover:shadow-green-500/20 hover:border-green-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                  <h3 className="text-sm font-bold text-green-300 mb-2 flex items-center">
+                    <Target className="h-4 w-4 mr-2 text-green-400" />
+                    目标
+                  </h3>
+                  <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.2s' }}>{currentPlan.goal}</p>
+                </div>
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-purple-500/20 shadow-xl hover:shadow-purple-500/20 hover:border-purple-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                  <h3 className="text-sm font-bold text-purple-300 mb-2 flex items-center">
+                    <Timer className="h-4 w-4 mr-2 text-purple-400" />
+                    时长
+                  </h3>
+                  <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.4s' }}>{currentPlan.duration} 周</p>
+                </div>
+              </div>
+              <div className="mt-6">
+                <Link
+                  to="/track"
+                  className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center transition-colors duration-300 group"
+                >
+                  查看计划详情
+                  <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* 锻炼记录 */}
+          <section className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-8 border border-cyan-500/30 overflow-hidden relative animate-fade-in">
+            {/* 背景装饰 */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+              <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+            </div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center mb-6">
                 <Activity className="h-6 w-6 mr-3 text-cyan-400 animate-pulse" />
-                当前计划
-                <span className="ml-3 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-xs text-cyan-300 font-medium animate-pulse">进行中</span>
+                锻炼记录
               </h2>
-              <Link
-                to="/track"
-                className="mt-3 md:mt-0 px-8 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-bold hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-cyan-500/40 transform hover:scale-105 flex items-center group"
-              >
-                继续锻炼
-                <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
-                <h3 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-cyan-400" />
-                  计划名称
+              
+              {/* 添加记录表单 */}
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 rounded-xl border border-cyan-500/20 shadow-xl mb-8">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <Plus className="h-5 w-5 mr-2 text-cyan-400" />
+                  添加锻炼记录
                 </h3>
-                <p className="text-xl font-bold text-white animate-fade-in">{currentPlan.name}</p>
+                <form onSubmit={handleAddRecord} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">锻炼项目</label>
+                    <input
+                      type="text"
+                      value={newRecord.exercise}
+                      onChange={(e) => setNewRecord({ ...newRecord, exercise: e.target.value })}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      placeholder="例如：俯卧撑"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">组数</label>
+                    <input
+                      type="number"
+                      value={newRecord.sets}
+                      onChange={(e) => setNewRecord({ ...newRecord, sets: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">次数</label>
+                    <input
+                      type="number"
+                      value={newRecord.reps}
+                      onChange={(e) => setNewRecord({ ...newRecord, reps: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">重量 (kg)</label>
+                    <input
+                      type="number"
+                      value={newRecord.weight}
+                      onChange={(e) => setNewRecord({ ...newRecord, weight: parseFloat(e.target.value) || 0 })}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      min="0"
+                      step="0.5"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">时长 (分钟)</label>
+                    <input
+                      type="number"
+                      value={newRecord.duration}
+                      onChange={(e) => setNewRecord({ ...newRecord, duration: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      min="0"
+                    />
+                  </div>
+                  <div className="md:col-span-2 lg:col-span-1 flex items-end">
+                    <button
+                      type="submit"
+                      className="w-full px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-cyan-500/40"
+                    >
+                      保存记录
+                    </button>
+                  </div>
+                </form>
               </div>
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-green-500/20 shadow-xl hover:shadow-green-500/20 hover:border-green-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
-                <h3 className="text-sm font-bold text-green-300 mb-2 flex items-center">
-                  <Target className="h-4 w-4 mr-2 text-green-400" />
-                  目标
-                </h3>
-                <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.2s' }}>{currentPlan.goal}</p>
-              </div>
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-purple-500/20 shadow-xl hover:shadow-purple-500/20 hover:border-purple-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
-                <h3 className="text-sm font-bold text-purple-300 mb-2 flex items-center">
-                  <Timer className="h-4 w-4 mr-2 text-purple-400" />
-                  时长
-                </h3>
-                <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.4s' }}>{currentPlan.duration} 周</p>
+              
+              {/* 记录列表 */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">最近记录</h3>
+                {isLoading ? (
+                  <div className="text-center py-8 text-gray-400">加载中...</div>
+                ) : error ? (
+                  <div className="text-center py-8 text-red-400">{error}</div>
+                ) : records.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">暂无锻炼记录</div>
+                ) : (
+                  <div className="space-y-4">
+                    {records.map((record) => (
+                      <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-xl font-bold text-white mb-2">{record.exercise}</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                              <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets}</span></div>
+                              <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps}</span></div>
+                              <div className="text-gray-300">重量: <span className="text-cyan-400 font-medium">{record.weight} kg</span></div>
+                              <div className="text-gray-300">时长: <span className="text-cyan-400 font-medium">{record.duration} 分钟</span></div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            {new Date(record.created_at || record.date).toLocaleString('zh-CN')}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="mt-6">
-              <Link
-                to="/track"
-                className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center transition-colors duration-300 group"
-              >
-                查看计划详情
-                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </div>
-        </section>
+          </section>
+        </>
       )}
 
       {/* 功能卡片 */}
