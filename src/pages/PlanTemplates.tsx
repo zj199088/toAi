@@ -86,15 +86,10 @@ const PlanTemplates: React.FC = () => {
               className={cn(
                 'bg-white rounded-xl shadow-md overflow-hidden border transition-all cursor-pointer relative',
                 selectedTemplate === template.id
-                  ? 'border-blue-400 shadow-lg transform scale-105 shadow-blue-500/20'
+                  ? 'border-blue-500 border-2 shadow-lg transform scale-105 shadow-blue-500/30'
                   : 'border-gray-100 hover:shadow-md hover:border-blue-200'
               )}
             >
-              {selectedTemplate === template.id && (
-                <div className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-blue-500 to-indigo-600 p-[1px] pointer-events-none">
-                  <div className="w-full h-full rounded-lg bg-white" />
-                </div>
-              )}
               <div className="relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
                 <img 
@@ -114,35 +109,41 @@ const PlanTemplates: React.FC = () => {
               </div>
               <div className="p-6">
                 {selectedTemplate === template.id && (
-                  <div className="mt-4 space-y-4">
-                    <h4 className="text-sm font-medium text-blue-600 mb-2 flex items-center">
+                  <div className="mt-2 space-y-3">
+                    <h4 className="text-base font-semibold text-blue-700 mb-3 flex items-center">
                       <Target className="h-4 w-4 mr-2" />
                       锻炼内容
                     </h4>
-                    <div className="space-y-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
-                      {console.log(`渲染模板 ${template.id} 的锻炼内容:`, template.exercises)}
-                      {Array.isArray(template.exercises) ? (
-                        template.exercises.length > 0 ? (
-                          template.exercises.map((exercise, index) => (
-                            <div key={index} className="text-sm text-gray-700 flex flex-wrap items-center p-2 rounded-md hover:bg-white transition-colors">
-                              <span className="w-1/3 font-medium truncate">{exercise.name || '未知动作'}</span>
-                              <span className="w-1/3 text-center text-gray-600">{exercise.sets || 0} 组</span>
-                              <span className="w-1/3 text-right text-gray-600 font-medium">
-                                {exercise.reps ? `${exercise.reps} 次` : exercise.duration || '未知'}
-                                {exercise.note && <span className="ml-1 text-blue-500 text-xs">({exercise.note})</span>}
-                              </span>
+                    <div className="space-y-2 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      {(() => {
+                        console.log(`渲染模板 ${template.id} 的锻炼内容:`, template.exercises)
+                        if (Array.isArray(template.exercises)) {
+                          if (template.exercises.length > 0) {
+                            return template.exercises.map((exercise, index) => (
+                              <div key={index} className="text-sm text-gray-800 flex flex-wrap items-center p-3 rounded-md bg-white border border-blue-100">
+                                <span className="w-1/3 font-medium truncate">{exercise.name || '未知动作'}</span>
+                                <span className="w-1/3 text-center text-gray-700">{exercise.sets || 0} 组</span>
+                                <span className="w-1/3 text-right text-gray-700 font-medium">
+                                  {exercise.reps ? `${exercise.reps} 次` : exercise.duration || '未知'}
+                                  {exercise.note && <span className="ml-1 text-blue-600 text-xs">({exercise.note})</span>}
+                                </span>
+                              </div>
+                            ))
+                          } else {
+                            return (
+                              <div className="text-center text-gray-600 py-6">
+                                暂无锻炼内容
+                              </div>
+                            )
+                          }
+                        } else {
+                          return (
+                            <div className="text-center text-gray-600 py-6">
+                              锻炼内容格式错误
                             </div>
-                          ))
-                        ) : (
-                          <div className="text-center text-gray-500 py-4">
-                            暂无锻炼内容
-                          </div>
-                        )
-                      ) : (
-                        <div className="text-center text-gray-500 py-4">
-                          锻炼内容格式错误
-                        </div>
-                      )}
+                          )
+                        }
+                      })()}
                     </div>
                   </div>
                 )}
