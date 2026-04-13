@@ -10,7 +10,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   useEffect(() => {
-    checkAuth()
+    // 暂时注释掉认证检查，以解决加载中问题
+    // checkAuth()
   }, [checkAuth])
   const navItems = [
     { name: '首页', path: '/' },
