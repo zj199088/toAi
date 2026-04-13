@@ -20,29 +20,39 @@ export const useUserStore = create<UserState>((set) => ({
   error: null,
   signUp: async (email, password, name) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name }
+        }
+      })
+      if (error) {
+        set({ error: error.message, isLoading: false })
+      } else {
+        set({ user: data.user, isLoading: false })
       }
-    })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
-      set({ user: data.user, isLoading: false })
+    } catch (error) {
+      console.error('注册失败:', error)
+      set({ error: '注册失败，请稍后重试', isLoading: false })
     }
   },
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-    } else {
-      set({ user: data.user, isLoading: false })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      if (error) {
+        set({ error: error.message, isLoading: false })
+      } else {
+        set({ user: data.user, isLoading: false })
+      }
+    } catch (error) {
+      console.error('登录失败:', error)
+      set({ error: '登录失败，请稍后重试', isLoading: false })
     }
   },
   signOut: async () => {
