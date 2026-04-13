@@ -105,25 +105,53 @@ export const useUserStore = create<UserState>((set) => ({
       // 立即设置加载状态
       set({ isLoading: true, error: null })
       
-      // 简化版本：只从localStorage获取用户信息，不尝试连接Supabase
-      const storedUser = localStorage.getItem('user')
-      const storedIsAdmin = localStorage.getItem('isAdmin')
+      // 首先尝试从Supabase获取当前用户会话
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
       
-      if (storedUser) {
+      if (user) {
+        // 从Supabase获取到用户信息
+        const userData = {
+          id: user.id,
+          email: user.email,
+          user_metadata: {
+            name: user.user_metadata?.name || user.email?.split('@')[0],
+            displayName: user.user_metadata?.displayName || user.user_metadata?.name || user.email?.split('@')[0],
+            ...user.user_metadata
+          }
+        }
+        const isAdmin = user.email?.includes('admin') || false
+        
+        // 更新localStorage
+        localStorage.setItem('user', JSON.stringify(userData))
+        localStorage.setItem('isAdmin', isAdmin.toString())
+        
         set({ 
-          user: JSON.parse(storedUser), 
-          isAdmin: storedIsAdmin === 'true', 
+          user: userData, 
+          isAdmin, 
           isLoading: false, 
           error: null
         })
       } else {
-        // 没有本地存储的用户信息，直接设置为未登录状态
-        set({ 
-          user: null, 
-          isAdmin: false, 
-          isLoading: false, 
-          error: null
-        })
+        // 没有从Supabase获取到用户信息，检查localStorage
+        const storedUser = localStorage.getItem('user')
+        const storedIsAdmin = localStorage.getItem('isAdmin')
+        
+        if (storedUser) {
+          set({ 
+            user: JSON.parse(storedUser), 
+            isAdmin: storedIsAdmin === 'true', 
+            isLoading: false, 
+            error: null
+          })
+        } else {
+          // 没有本地存储的用户信息，直接设置为未登录状态
+          set({ 
+            user: null, 
+            isAdmin: false, 
+            isLoading: false, 
+            error: null
+          })
+        }
       }
     } catch (error) {
       console.error('认证检查失败:', error)
