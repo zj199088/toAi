@@ -65,38 +65,55 @@ const PlanTemplates: React.FC = () => {
               key={template.id}
               onClick={() => setSelectedTemplate(template.id)}
               className={cn(
-                'bg-white rounded-xl shadow-md overflow-hidden border transition-all cursor-pointer',
+                'bg-white rounded-xl shadow-md overflow-hidden border transition-all cursor-pointer relative',
                 selectedTemplate === template.id
-                  ? 'border-blue-600 shadow-lg transform scale-105'
-                  : 'border-gray-100 hover:shadow-md'
+                  ? 'border-blue-400 shadow-lg transform scale-105 shadow-blue-500/20'
+                  : 'border-gray-100 hover:shadow-md hover:border-blue-200'
               )}
             >
-              <div className="relative">
-                <img src={template.image} alt={template.name} className="w-full h-48 object-cover" />
+              {selectedTemplate === template.id && (
+                <div className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-blue-500 to-indigo-600 p-[1px] pointer-events-none">
+                  <div className="w-full h-full rounded-lg bg-white" />
+                </div>
+              )}
+              <div className="relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10" />
+                <img 
+                  src={template.image} 
+                  alt={template.name} 
+                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute bottom-4 left-4 z-20 text-white">
+                  <h4 className="text-lg font-bold">{template.name}</h4>
+                  <p className="text-sm opacity-90">{template.description.substring(0, 30)}...</p>
+                </div>
                 {selectedTemplate === template.id && (
-                  <div className="absolute top-4 right-4 bg-blue-600 text-white rounded-full p-2">
+                  <div className="absolute top-4 right-4 bg-blue-600 text-white rounded-full p-2 z-20">
                     <Check size={16} />
                   </div>
                 )}
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{template.description}</p>
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">锻炼内容</h4>
-                  <div className="space-y-2">
-                    {template.exercises?.map((exercise, index) => (
-                      <div key={index} className="text-xs text-gray-600 flex flex-wrap items-center">
-                        <span className="w-1/3 truncate">{exercise.name}</span>
-                        <span className="w-1/3 text-center">{exercise.sets} 组</span>
-                        <span className="w-1/3 text-right">
-                          {exercise.reps ? `${exercise.reps} 次` : `${exercise.duration}`}
-                          {exercise.note && <span className="ml-1 text-gray-500">({exercise.note})</span>}
-                        </span>
-                      </div>
-                    ))}
+                {selectedTemplate === template.id && (
+                  <div className="mt-4 space-y-4">
+                    <h4 className="text-sm font-medium text-blue-600 mb-2 flex items-center">
+                      <Target className="h-4 w-4 mr-2" />
+                      锻炼内容
+                    </h4>
+                    <div className="space-y-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
+                      {template.exercises?.map((exercise, index) => (
+                        <div key={index} className="text-sm text-gray-700 flex flex-wrap items-center p-2 rounded-md hover:bg-white transition-colors">
+                          <span className="w-1/3 font-medium truncate">{exercise.name}</span>
+                          <span className="w-1/3 text-center text-gray-600">{exercise.sets} 组</span>
+                          <span className="w-1/3 text-right text-gray-600 font-medium">
+                            {exercise.reps ? `${exercise.reps} 次` : `${exercise.duration}`}
+                            {exercise.note && <span className="ml-1 text-blue-500 text-xs">({exercise.note})</span>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           ))
