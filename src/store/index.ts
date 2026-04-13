@@ -56,27 +56,14 @@ export const useUserStore = create<UserState>((set) => ({
   },
   checkAuth: async () => {
     set({ isLoading: true })
-    // 模拟Supabase响应，避免API调用超时
-    // 实际项目中会使用真实的Supabase连接
-    setTimeout(() => {
-      // 模拟未登录状态
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      // 这里可以根据用户邮箱或其他信息判断是否为管理员
+      const isAdmin = session.user.email?.includes('admin') || false
+      set({ user: session.user, isAdmin, isLoading: false })
+    } else {
       set({ user: null, isAdmin: false, isLoading: false })
-      // 如需模拟登录状态，使用以下代码：
-      /*
-      set({
-        user: {
-          id: 'user123',
-          email: 'user@example.com',
-          user_metadata: {
-            name: '测试用户',
-            avatar: 'https://via.placeholder.com/150'
-          }
-        },
-        isAdmin: false,
-        isLoading: false
-      })
-      */
-    }, 500)
+    }
   },
   signInWithWechat: async (wechatInfo) => {
     set({ isLoading: true, error: null })
