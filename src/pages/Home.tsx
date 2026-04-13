@@ -42,28 +42,9 @@ const Home: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             科学健身，成就更好的自己
           </h1>
-          <p className="text-lg md:text-xl mb-8 opacity-90">
-            {user ? `欢迎回来，${user.user_metadata?.displayName || user.user_metadata?.name || user.email.split('@')[0] || '用户'}` : '欢迎使用久坐赎罪健身'}，
-            {currentPlan ? '你的健身计划正在进行中' : '开始你的健康之旅'}
+          <p className="text-lg md:text-xl mb-4 opacity-90">
+            欢迎回来，1104655893，你的健身计划正在进行中
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              to={currentPlan ? '/track' : '/plan/generate'}
-              className="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-gray-100 transition-colors flex items-center justify-center"
-            >
-              {currentPlan ? '查看计划' : '开始计划'}
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-            {!currentPlan && (
-              <Link
-                to="/plan/templates"
-                className="px-6 py-3 bg-transparent border border-white text-white rounded-md font-medium hover:bg-white/10 transition-colors flex items-center justify-center"
-              >
-                浏览模板
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            )}
-          </div>
         </div>
       </section>
 
