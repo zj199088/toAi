@@ -233,8 +233,8 @@ const Track: React.FC = () => {
       const record = {
         user_id: user?.id || user?.user_metadata?.id || 'user123',
         plan_id: currentPlan.id,
-        schedule_id: generateUUID(),
-        exercise_id: generateUUID(),
+        schedule_id: null,
+        exercise_id: null,
         date: selectedDay.toISOString().split('T')[0],
         sets_completed: 3,
         reps_completed: 15,
