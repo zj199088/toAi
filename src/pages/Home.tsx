@@ -1,8 +1,7 @@
 import React from 'react'
 import { useUserStore, useFitnessPlanStore } from '../store'
 import { Link } from 'react-router-dom'
-import { cn } from '../utils/cn'
-import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight } from 'lucide-react'
+import { Activity, Calendar, BarChart3, Utensils, User, ChevronRight, Target, Timer } from 'lucide-react'
 
 const Home: React.FC = () => {
   const { user, isAdmin } = useUserStore()
@@ -52,7 +51,7 @@ const Home: React.FC = () => {
               to={currentPlan ? '/track' : '/plan/generate'}
               className="px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-gray-100 transition-colors flex items-center justify-center"
             >
-              {currentPlan ? '继续锻炼' : '开始计划'}
+              {currentPlan ? '查看计划' : '开始计划'}
               <ChevronRight className="ml-2 h-4 w-4" />
             </Link>
             {!currentPlan && (
@@ -70,39 +69,63 @@ const Home: React.FC = () => {
 
       {/* 计划状态 */}
       {currentPlan && (
-        <section className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-            <h2 className="text-2xl font-bold">当前计划</h2>
-            <Link
-              to="/track"
-              className="mt-2 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center"
-            >
-              继续锻炼
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
+        <section className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-8 border border-cyan-500/30 overflow-hidden relative animate-fade-in">
+          {/* 背景装饰 */}
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-cyan-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+            <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-blue-800 mb-1">计划名称</h3>
-              <p className="text-lg font-semibold text-gray-800">{currentPlan.name}</p>
+          
+          {/* 网格线背景 */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+          
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center group">
+                <Activity className="h-6 w-6 mr-3 text-cyan-400 animate-pulse" />
+                当前计划
+                <span className="ml-3 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-xs text-cyan-300 font-medium animate-pulse">进行中</span>
+              </h2>
+              <Link
+                to="/track"
+                className="mt-3 md:mt-0 px-8 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-bold hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg shadow-cyan-500/40 transform hover:scale-105 flex items-center group"
+              >
+                继续锻炼
+                <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-green-800 mb-1">目标</h3>
-              <p className="text-lg font-semibold text-gray-800">{currentPlan.goal}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                <h3 className="text-sm font-bold text-cyan-300 mb-2 flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 text-cyan-400" />
+                  计划名称
+                </h3>
+                <p className="text-xl font-bold text-white animate-fade-in">{currentPlan.name}</p>
+              </div>
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-green-500/20 shadow-xl hover:shadow-green-500/20 hover:border-green-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                <h3 className="text-sm font-bold text-green-300 mb-2 flex items-center">
+                  <Target className="h-4 w-4 mr-2 text-green-400" />
+                  目标
+                </h3>
+                <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.2s' }}>{currentPlan.goal}</p>
+              </div>
+              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-purple-500/20 shadow-xl hover:shadow-purple-500/20 hover:border-purple-400/40 transition-all duration-500 hover:scale-[1.02] transform hover:-translate-y-1">
+                <h3 className="text-sm font-bold text-purple-300 mb-2 flex items-center">
+                  <Timer className="h-4 w-4 mr-2 text-purple-400" />
+                  时长
+                </h3>
+                <p className="text-xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.4s' }}>{currentPlan.duration} 周</p>
+              </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-purple-800 mb-1">时长</h3>
-              <p className="text-lg font-semibold text-gray-800">{currentPlan.duration} 周</p>
+            <div className="mt-6">
+              <Link
+                to="/track"
+                className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center transition-colors duration-300 group"
+              >
+                查看计划详情
+                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
-          </div>
-          <div className="mt-4">
-            <Link
-              to="/track"
-              className="text-blue-600 font-medium hover:text-blue-800 flex items-center"
-            >
-              查看计划详情
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
           </div>
         </section>
       )}
