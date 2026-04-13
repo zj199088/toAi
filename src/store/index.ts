@@ -484,7 +484,7 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
         throw error
       }
 
-      console.log('✅ 成功从数据库获取记录:', data)
+      console.log('✅ 成功从数据库获取记录，共', data?.length || 0, '条:', data)
       set({ records: data || [], isLoading: false })
     } catch (error) {
       console.error('❌ 从数据库获取锻炼记录失败:', error)

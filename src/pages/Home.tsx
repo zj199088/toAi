@@ -184,7 +184,7 @@ const Home: React.FC = () => {
               
               {/* 记录列表 */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">最近记录</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">最近记录 (共{records.length}条)</h3>
                 {isLoading ? (
                   <div className="text-center py-8 text-gray-400">加载中...</div>
                 ) : error ? (
@@ -193,7 +193,9 @@ const Home: React.FC = () => {
                   <div className="text-center py-8 text-gray-400">暂无锻炼记录</div>
                 ) : (
                   <div className="space-y-4">
-                    {records.map((record) => (
+                    {records.map((record, index) => {
+                      console.log(`📝 显示记录 ${index + 1}/${records.length}:`, record);
+                      return (
                       <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
                         <div className="flex justify-between items-start">
                           <div>
@@ -216,7 +218,8 @@ const Home: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
