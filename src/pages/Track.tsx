@@ -66,20 +66,57 @@ const Track: React.FC = () => {
     return workoutSchedule.find(w => w.day === dayOfWeek)
   }
 
-  const handleWorkoutComplete = (exercise: string) => {
-    const workout = getCurrentWorkout()
-    if (!workout || !currentPlan) return
+  // 状态管理：存储每个练习的组完成情况
+  const [exerciseSets, setExerciseSets] = useState<Record<string, boolean[]>>({})
 
-    addRecord({
-      user_id: user?.id || 'user123',
-      plan_id: currentPlan.id,
-      schedule_id: 'schedule123',
-      exercise_id: `exercise_${exercise}`,
-      date: selectedDay.toISOString().split('T')[0],
-      sets_completed: 3,
-      reps_completed: 15,
-      created_at: new Date().toISOString()
+  // 初始化练习的组状态
+  useEffect(() => {
+    const workout = getCurrentWorkout()
+    if (workout) {
+      const initialSets: Record<string, boolean[]> = {}
+      workout.exercises.forEach((exercise) => {
+        // 默认为3组，每组初始状态为未完成
+        initialSets[exercise] = [false, false, false]
+      })
+      setExerciseSets(initialSets)
+    }
+  }, [selectedDay])
+
+  // 切换组的完成状态
+  const toggleSetComplete = (exercise: string, setIndex: number) => {
+    setExerciseSets(prev => {
+      const updatedSets = { ...prev }
+      if (updatedSets[exercise]) {
+        updatedSets[exercise] = [...updatedSets[exercise]]
+        updatedSets[exercise][setIndex] = !updatedSets[exercise][setIndex]
+      }
+      return updatedSets
     })
+  }
+
+  // 检查练习是否全部完成
+  const isExerciseComplete = (exercise: string) => {
+    const sets = exerciseSets[exercise]
+    return sets && sets.every(set => set)
+  }
+
+  // 当练习全部完成时添加记录
+  const handleExerciseComplete = (exercise: string) => {
+    if (!currentPlan) return
+
+    // 只有当所有组都完成时才添加记录
+    if (isExerciseComplete(exercise)) {
+      addRecord({
+        user_id: user?.id || 'user123',
+        plan_id: currentPlan.id,
+        schedule_id: 'schedule123',
+        exercise_id: `exercise_${exercise}`,
+        date: selectedDay.toISOString().split('T')[0],
+        sets_completed: 3,
+        reps_completed: 15,
+        created_at: new Date().toISOString()
+      })
+    }
   }
 
   const handleBodyMeasurementSubmit = (e: React.FormEvent) => {
@@ -149,31 +186,55 @@ const Track: React.FC = () => {
                           r.exercise_id === `exercise_${exercise}` && 
                           r.date === selectedDay.toISOString().split('T')[0]
                         )
+                        const sets = exerciseSets[exercise] || [false, false, false]
+                        const exerciseComplete = isExerciseComplete(exercise)
                         return (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <span className="font-medium">{exercise}</span>
-                            <button
-                              onClick={() => handleWorkoutComplete(exercise)}
-                              disabled={isCompleted}
-                              className={cn(
-                                'flex items-center space-x-1 px-3 py-1 rounded-md transition-colors',
-                                isCompleted
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                              )}
-                            >
-                              {isCompleted ? (
-                                <>
-                                  <Check size={16} />
-                                  <span>已完成</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Check size={16} />
-                                  <span>标记完成</span>
-                                </>
-                              )}
-                            </button>
+                          <div key={index} className="p-3 bg-gray-50 rounded-lg mb-3">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="font-medium">{exercise}</span>
+                              <button
+                                onClick={() => handleExerciseComplete(exercise)}
+                                disabled={isCompleted || !exerciseComplete}
+                                className={cn(
+                                  'flex items-center space-x-1 px-3 py-1 rounded-md transition-colors',
+                                  isCompleted
+                                    ? 'bg-green-100 text-green-700'
+                                    : exerciseComplete
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                )}
+                              >
+                                {isCompleted ? (
+                                  <>
+                                    <Check size={16} />
+                                    <span>已完成</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check size={16} />
+                                    <span>完成练习</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                            <div className="flex space-x-2">
+                              {sets.map((setComplete, setIndex) => (
+                                <button
+                                  key={setIndex}
+                                  onClick={() => toggleSetComplete(exercise, setIndex)}
+                                  disabled={isCompleted}
+                                  className={cn(
+                                    'flex-1 py-2 rounded-md transition-colors text-center',
+                                    setComplete
+                                      ? 'bg-green-100 text-green-700 border border-green-200'
+                                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                  )}
+                                >
+                                  第 {setIndex + 1} 组
+                                  {setComplete && <Check size={14} className="inline ml-1" />}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         )
                       })}
