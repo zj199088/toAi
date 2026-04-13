@@ -148,7 +148,12 @@ const Home: React.FC = () => {
                       <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
                         <div className="flex justify-between items-start">
                           <div>
-                              <h4 className="text-xl font-bold text-white mb-2">{record.exercise_name || record.exercise || record.exercise_id?.replace('exercise_', '') || '未知锻炼'}</h4>
+                              <h4 className="text-xl font-bold text-white mb-2">
+                                {record.exercise_name || 
+                                 record.exercise || 
+                                 record.exercise_id?.replace('exercise_', '') || 
+                                 '未知锻炼'}
+                              </h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                               <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span></div>
                               <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span></div>
@@ -168,7 +173,7 @@ const Home: React.FC = () => {
               
               <div className="mt-6">
                 <Link
-                  to="/track"
+                  to="/records"
                   className="text-cyan-400 font-medium hover:text-cyan-300 flex items-center transition-colors duration-300 group"
                 >
                   查看完整锻炼记录

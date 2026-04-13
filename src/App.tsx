@@ -8,6 +8,7 @@ import PlanGenerate from './pages/PlanGenerate'
 import PlanTemplates from './pages/PlanTemplates'
 import Track from './pages/Track'
 import Diet from './pages/Diet'
+import WorkoutRecords from './pages/WorkoutRecords'
 import AdminUsers from './pages/admin/Users'
 import AdminTemplates from './pages/admin/Templates'
 import AdminStats from './pages/admin/Stats'
@@ -66,6 +67,11 @@ export default function App() {
         <Route path="/diet" element={
           <Layout>
             <Diet />
+          </Layout>
+        } />
+        <Route path="/records" element={
+          <Layout>
+            <WorkoutRecords />
           </Layout>
         } />
         <Route path="/admin/users" element={
