@@ -62,8 +62,10 @@ const PlanTemplates: React.FC = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">选择健身模板</h1>
-        <p className="text-gray-600">选择预设模板，快速开始你的健身之旅</p>
+        <h1 className="text-4xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
+          选择健身模板
+        </h1>
+        <p className="text-gray-400">选择预设模板，快速开始你的健身之旅</p>
       </div>
 
       {/* 模板选择 */}
@@ -71,8 +73,8 @@ const PlanTemplates: React.FC = () => {
         {isLoading ? (
           <div className="col-span-full flex justify-center items-center py-12">
             <div className="flex flex-col items-center">
-              <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
-              <p className="mt-2 text-gray-600">加载模板中...</p>
+              <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
+              <p className="mt-2 text-gray-400">加载模板中...</p>
             </div>
           </div>
         ) : templates.length > 0 ? (
@@ -84,10 +86,10 @@ const PlanTemplates: React.FC = () => {
                 setSelectedTemplate(template.id)
               }}
               className={cn(
-                'bg-white rounded-xl shadow-md overflow-hidden border transition-all cursor-pointer relative',
+                'bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl overflow-hidden border transition-all cursor-pointer relative shadow-xl hover:shadow-cyan-500/20',
                 selectedTemplate === template.id
-                  ? 'border-blue-500 border-2 shadow-lg transform scale-105 shadow-blue-500/30'
-                  : 'border-gray-100 hover:shadow-md hover:border-blue-200'
+                  ? 'border-cyan-400/40 shadow-lg transform scale-105 shadow-cyan-500/30'
+                  : 'border-slate-700/50 hover:border-cyan-500/30'
               )}
             >
               <div className="relative overflow-hidden group">
@@ -102,7 +104,7 @@ const PlanTemplates: React.FC = () => {
                   <p className="text-sm opacity-90">{template.description.substring(0, 30)}...</p>
                 </div>
                 {selectedTemplate === template.id && (
-                  <div className="absolute top-4 right-4 bg-blue-600 text-white rounded-full p-2 z-20">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-full p-2 z-20">
                     <Check size={16} />
                   </div>
                 )}
@@ -110,35 +112,35 @@ const PlanTemplates: React.FC = () => {
               <div className="p-6">
                 {selectedTemplate === template.id && (
                   <div className="mt-2 space-y-3">
-                    <h4 className="text-base font-semibold text-blue-700 mb-3 flex items-center">
-                      <Target className="h-4 w-4 mr-2" />
+                    <h4 className="text-base font-semibold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3 flex items-center">
+                      <Target className="h-4 w-4 mr-2 text-cyan-400" />
                       锻炼内容
                     </h4>
-                    <div className="space-y-2 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                    <div className="space-y-2 bg-gradient-to-r from-slate-800/50 to-slate-900/50 p-4 rounded-xl border border-cyan-500/20">
                       {(() => {
                         console.log(`渲染模板 ${template.id} 的锻炼内容:`, template.exercises)
                         if (Array.isArray(template.exercises)) {
                           if (template.exercises.length > 0) {
                             return template.exercises.map((exercise, index) => (
-                              <div key={index} className="text-sm text-gray-800 flex flex-wrap items-center p-3 rounded-md bg-white border border-blue-100">
+                              <div key={index} className="text-sm text-gray-200 flex flex-wrap items-center p-3 rounded-md bg-slate-800/80 border border-cyan-500/20">
                                 <span className="w-1/3 font-medium truncate">{exercise.name || '未知动作'}</span>
-                                <span className="w-1/3 text-center text-gray-700">{exercise.sets || 0} 组</span>
-                                <span className="w-1/3 text-right text-gray-700 font-medium">
+                                <span className="w-1/3 text-center text-gray-300">{exercise.sets || 0} 组</span>
+                                <span className="w-1/3 text-right text-gray-300 font-medium">
                                   {exercise.reps ? `${exercise.reps} 次` : exercise.duration || '未知'}
-                                  {exercise.note && <span className="ml-1 text-blue-600 text-xs">({exercise.note})</span>}
+                                  {exercise.note && <span className="ml-1 text-cyan-400 text-xs">({exercise.note})</span>}
                                 </span>
                               </div>
                             ))
                           } else {
                             return (
-                              <div className="text-center text-gray-600 py-6">
+                              <div className="text-center text-gray-400 py-6">
                                 暂无锻炼内容
                               </div>
                             )
                           }
                         } else {
                           return (
-                            <div className="text-center text-gray-600 py-6">
+                            <div className="text-center text-gray-400 py-6">
                               锻炼内容格式错误
                             </div>
                           )
@@ -152,17 +154,17 @@ const PlanTemplates: React.FC = () => {
           ))
         ) : (
           <div className="col-span-full flex justify-center items-center py-12">
-            <p className="text-gray-600">暂无模板数据</p>
+            <p className="text-gray-400">暂无模板数据</p>
           </div>
         )}
       </div>
 
       {/* 计划设置 */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl p-6 border border-cyan-500/30">
         <div className="space-y-6">
           {/* 健身目标 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-300 mb-3">
               健身目标
             </label>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -172,13 +174,16 @@ const PlanTemplates: React.FC = () => {
                   type="button"
                   onClick={() => setGoal(g)}
                   className={cn(
-                    'px-4 py-2 rounded-md border transition-colors',
+                    'px-4 py-3 rounded-xl border transition-all duration-300 relative overflow-hidden group',
                     goal === g
-                      ? 'border-blue-600 bg-blue-50 text-blue-600'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400/40 text-cyan-300'
+                      : 'bg-slate-800/50 border-slate-700/50 text-gray-300 hover:bg-slate-700/50 hover:border-cyan-500/30 hover:text-cyan-300'
                   )}
                 >
-                  {g}
+                  {goal === g && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 animate-pulse" />
+                  )}
+                  <span className="relative z-10 font-medium">{g}</span>
                 </button>
               ))}
             </div>
@@ -186,23 +191,25 @@ const PlanTemplates: React.FC = () => {
 
           {/* 计划时长 */}
           <div>
-            <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="duration" className="block text-sm font-medium text-gray-300 mb-3">
               计划时长
             </label>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <select
                 id="duration"
                 value={duration}
                 onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300"
               >
                 {durations.map((weeks) => (
-                  <option key={weeks} value={weeks}>
+                  <option key={weeks} value={weeks} className="bg-slate-900 text-gray-200">
                     {weeks} 周 ({Math.floor(weeks / 4)} 个月)
                   </option>
                 ))}
               </select>
-              <Calendar className="h-5 w-5 text-gray-500" />
+              <div className="p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-cyan-400">
+                <Calendar className="h-5 w-5" />
+              </div>
             </div>
           </div>
 
@@ -211,7 +218,12 @@ const PlanTemplates: React.FC = () => {
             <button
               type="submit"
               disabled={!selectedTemplate}
-              className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-3 px-4 rounded-md hover:from-blue-700 hover:to-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className={cn(
+                'w-full py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center font-bold',
+                !selectedTemplate
+                  ? 'bg-slate-700/50 border border-slate-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/40 transform hover:scale-105'
+              )}
             >
               开始计划
               <ChevronRight className="ml-2 h-5 w-5" />
@@ -221,23 +233,23 @@ const PlanTemplates: React.FC = () => {
       </form>
 
       {/* 提示信息 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-blue-800 mb-2">模板选择说明</h3>
-        <ul className="space-y-2 text-sm text-blue-700">
+      <div className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-xl p-6">
+        <h3 className="text-lg font-medium bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3">模板选择说明</h3>
+        <ul className="space-y-3 text-sm text-gray-300">
           <li className="flex items-start">
-            <span className="mr-2">•</span>
+            <span className="mr-2 text-cyan-400">•</span>
             选择适合您当前健身水平的模板
           </li>
           <li className="flex items-start">
-            <span className="mr-2">•</span>
+            <span className="mr-2 text-cyan-400">•</span>
             根据您的健身目标调整计划设置
           </li>
           <li className="flex items-start">
-            <span className="mr-2">•</span>
+            <span className="mr-2 text-cyan-400">•</span>
             模板会根据您选择的时长自动调整训练强度
           </li>
           <li className="flex items-start">
-            <span className="mr-2">•</span>
+            <span className="mr-2 text-cyan-400">•</span>
             开始后，您可以在「锻炼跟踪」页面查看详细计划
           </li>
         </ul>
