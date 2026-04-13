@@ -177,6 +177,12 @@ const Track: React.FC = () => {
             ...prevLast,
             [exerciseName]: setIndex
           }))
+          
+          // 检查是否所有组都完成了
+          if (updatedSets[exerciseName].every(set => set)) {
+            // 自动调用完成练习函数
+            handleExerciseComplete(exerciseName)
+          }
         }
       }
       return updatedSets
@@ -195,8 +201,8 @@ const Track: React.FC = () => {
 
     // 只有当所有组都完成时才添加记录
     if (isExerciseComplete(exerciseName)) {
-      addRecord({
-        user_id: user?.id || 'user123',
+      const record = {
+        user_id: user?.id || user?.user_metadata?.id || 'user123',
         plan_id: currentPlan.id,
         schedule_id: 'schedule123',
         exercise_id: `exercise_${exerciseName}`,
@@ -204,7 +210,19 @@ const Track: React.FC = () => {
         sets_completed: 3,
         reps_completed: 15,
         created_at: new Date().toISOString()
-      })
+      }
+      
+      // 尝试添加记录到数据库
+      addRecord(record)
+      
+      // 同时保存到本地存储作为 fallback
+      try {
+        const existingRecords = JSON.parse(localStorage.getItem('workout_records') || '[]')
+        existingRecords.push(record)
+        localStorage.setItem('workout_records', JSON.stringify(existingRecords))
+      } catch (error) {
+        console.error('保存锻炼记录到本地存储失败:', error)
+      }
     }
   }
 

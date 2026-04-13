@@ -243,7 +243,7 @@ interface WorkoutRecordState {
   getRecords: (planId: string) => Promise<void>
 }
 
-export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
+export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
   records: [],
   isLoading: false,
   error: null,
@@ -268,8 +268,13 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
         isLoading: false 
       }))
     } catch (error) {
-      console.error('添加锻炼记录失败:', error)
-      set({ error: '添加锻炼记录失败，请稍后重试', isLoading: false })
+      console.error('添加锻炼记录到数据库失败:', error)
+      // 即使数据库失败，也将记录添加到状态中
+      set((state) => ({ 
+        records: [...state.records, record],
+        isLoading: false,
+        error: '添加锻炼记录到数据库失败，已保存到本地' 
+      }))
     }
   },
   getRecords: async (planId) => {
@@ -288,8 +293,16 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set) => ({
 
       set({ records: data || [], isLoading: false })
     } catch (error) {
-      console.error('获取锻炼记录失败:', error)
-      set({ error: '获取锻炼记录失败，请稍后重试', isLoading: false })
+      console.error('从数据库获取锻炼记录失败:', error)
+      // 尝试从本地存储获取记录
+      try {
+        const existingRecords = JSON.parse(localStorage.getItem('workout_records') || '[]')
+        const planRecords = existingRecords.filter((r: any) => r.plan_id === planId)
+        set({ records: planRecords, isLoading: false, error: '从数据库获取锻炼记录失败，已使用本地数据' })
+      } catch (localError) {
+        console.error('从本地存储获取锻炼记录失败:', localError)
+        set({ records: [], isLoading: false, error: '获取锻炼记录失败' })
+      }
     }
   }
 }))
