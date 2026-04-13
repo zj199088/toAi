@@ -5,13 +5,9 @@ import { cn } from '../utils/cn'
 import { Menu, X, User } from 'lucide-react'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAdmin, checkAuth, signOut } = useUserStore()
+  const { user, isAdmin, signOut } = useUserStore()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
 
   const navItems = [
     { name: '首页', path: '/' },
