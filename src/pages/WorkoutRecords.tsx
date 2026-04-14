@@ -193,40 +193,53 @@ const WorkoutRecords: React.FC = () => {
               <div className="space-y-4">
                 {currentRecords.map((record) => (
                   <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-xl font-bold text-white mb-2">
+                    <div className="space-y-4">
+                      {/* 锻炼名称和日期时间 */}
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                        <h4 className="text-lg font-bold text-white break-words">
                           {exerciseMap[record.exercise_id] || 
                            record.exercise_name || 
                            record.exercise || 
                            record.exercise_id?.replace('exercise_', '') || 
                            '未知锻炼'}
                         </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                          <div className="text-gray-300 flex items-center">
-                            <Dumbbell className="h-4 w-4 mr-1.5 text-cyan-400" />
-                            组数: <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <div className="text-xs sm:text-sm text-gray-400 flex items-center space-x-1">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-400" />
+                            <span>{record.date || formatChinaDate(record.created_at)}</span>
                           </div>
-                          <div className="text-gray-300 flex items-center">
-                            <Zap className="h-4 w-4 mr-1.5 text-yellow-400" />
-                            次数: <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span>
-                          </div>
-                          <div className="text-gray-300 flex items-center">
-                            <Timer className="h-4 w-4 mr-1.5 text-green-400" />
-                            时长: <span className="text-cyan-400 font-medium">{record.duration || 0} 分钟</span>
-                          </div>
-                          <div className="text-gray-300">
-                            重量: <span className="text-cyan-400 font-medium">{record.weight || 0} kg</span>
+                          <div className="text-xs sm:text-sm text-gray-400">
+                            {formatChinaTime(record.created_at || record.date)}
                           </div>
                         </div>
                       </div>
-                      <div className="text-sm text-gray-400 flex flex-col items-end">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-cyan-400" />
-                          <span>{record.date || formatChinaDate(record.created_at)}</span>
+                      
+                      {/* 数据网格 - 小屏幕单列，大屏幕双列 */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                          <div className="flex items-center">
+                            <Dumbbell className="h-4 w-4 mr-1.5 text-cyan-400" />
+                            <span className="text-gray-300">组数</span>
+                          </div>
+                          <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span>
                         </div>
-                        <div className="mt-1">
-                          {formatChinaTime(record.created_at || record.date)}
+                        <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                          <div className="flex items-center">
+                            <Zap className="h-4 w-4 mr-1.5 text-yellow-400" />
+                            <span className="text-gray-300">次数</span>
+                          </div>
+                          <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                          <div className="flex items-center">
+                            <Timer className="h-4 w-4 mr-1.5 text-green-400" />
+                            <span className="text-gray-300">时长</span>
+                          </div>
+                          <span className="text-cyan-400 font-medium">{record.duration || 0} 分钟</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                          <span className="text-gray-300">重量</span>
+                          <span className="text-cyan-400 font-medium">{record.weight || 0} kg</span>
                         </div>
                       </div>
                     </div>

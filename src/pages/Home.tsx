@@ -213,31 +213,46 @@ const Home: React.FC = () => {
                       console.log(`📝 显示记录 ${index + 1}/${records.length}:`, record);
                       return (
                       <div key={record.id} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-5 rounded-xl border border-cyan-500/20 shadow-xl hover:shadow-cyan-500/20 hover:border-cyan-400/40 transition-all duration-500">
-                        <div className="flex justify-between items-start">
-                          <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-xl font-bold text-white">
-                                  {exerciseMap[record.exercise_id] || 
-                                   record.exercise_name || 
-                                   record.exercise || 
-                                   record.exercise_id?.replace('exercise_', '') || 
-                                   '未知锻炼'}
-                                </h4>
-                                {record.fitness_plans?.name && (
-                                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full">
-                                    {record.fitness_plans.name}
-                                  </span>
-                                )}
+                        <div className="space-y-4">
+                          {/* 锻炼名称和计划名称 */}
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <h4 className="text-lg font-bold text-white break-words">
+                              {exerciseMap[record.exercise_id] || 
+                               record.exercise_name || 
+                               record.exercise || 
+                               record.exercise_id?.replace('exercise_', '') || 
+                               '未知锻炼'}
+                            </h4>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              {record.fitness_plans?.name && (
+                                <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full whitespace-nowrap">
+                                  {record.fitness_plans.name}
+                                </span>
+                              )}
+                              <div className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
+                                {formatChinaDateTime(record.created_at || record.date)}
                               </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                              <div className="text-gray-300">组数: <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span></div>
-                              <div className="text-gray-300">次数: <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span></div>
-                              <div className="text-gray-300">重量: <span className="text-cyan-400 font-medium">{record.weight || 0} kg</span></div>
-                              <div className="text-gray-300">时长: <span className="text-cyan-400 font-medium">{record.duration || 0} 分钟</span></div>
                             </div>
                           </div>
-                          <div className="text-sm text-gray-400">
-                            {formatChinaDateTime(record.created_at || record.date)}
+                          
+                          {/* 数据网格 - 小屏幕单列，大屏幕双列 */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                              <span className="text-gray-300">组数</span>
+                              <span className="text-cyan-400 font-medium">{record.sets || record.sets_completed || 0}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                              <span className="text-gray-300">次数</span>
+                              <span className="text-cyan-400 font-medium">{record.reps || record.reps_completed || 0}</span>
+                            </div>
+                            <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                              <span className="text-gray-300">重量</span>
+                              <span className="text-cyan-400 font-medium">{record.weight || 0} kg</span>
+                            </div>
+                            <div className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                              <span className="text-gray-300">时长</span>
+                              <span className="text-cyan-400 font-medium">{record.duration || 0} 分钟</span>
+                            </div>
                           </div>
                         </div>
                       </div>
