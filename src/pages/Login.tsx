@@ -51,7 +51,7 @@ const Login: React.FC = () => {
   // 添加背景动画效果
   useEffect(() => {
     const interval = setInterval(() => {
-      const container = document.querySelector('.login-container')
+      const container = document.querySelector('.login-container') as HTMLElement
       if (container) {
         const randomX = Math.random() * 100
         const randomY = Math.random() * 100
@@ -64,10 +64,10 @@ const Login: React.FC = () => {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden login-container" style={{ 
-      '--cursor-x': '50%', 
-      '--cursor-y': '50%' 
-    }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden login-container" style={{
+      '--cursor-x': '50%',
+      '--cursor-y': '50%'
+    } as React.CSSProperties}>
       {/* 科幻背景 */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-blue-900">
         {/* 网格背景 */}
