@@ -454,7 +454,7 @@ export const useWorkoutRecordStore = create<WorkoutRecordState>((set, get) => ({
   error: null,
   totalCountLastYear: 0,
   addRecord: async (record) => {
-    if (!checkAuthAndRedirect()) return
+    if (!checkAuthAndRedirect(false)) return
     console.log('🔄 开始添加锻炼记录，数据:', record)
     set({ isLoading: true, error: null })
     try {
