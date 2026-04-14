@@ -607,11 +607,11 @@ const Track: React.FC = () => {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
                                   {(exerciseComplete || hasRecord) && (
                                     <button
                                       onClick={() => resetExercise(exercise.name, exercise.sets)}
-                                      className="flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/40 transform hover:scale-105"
+                                      className="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-sm bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/40 transform hover:scale-105 w-full sm:w-auto"
                                     >
                                       <RotateCcw size={20} />
                                       <span>重置</span>
@@ -621,7 +621,7 @@ const Track: React.FC = () => {
                                   onClick={() => handleExerciseComplete(exercise.name)}
                                   disabled={!exerciseComplete || isSubmitting[exercise.name]}
                                   className={cn(
-                                    'flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm',
+                                    'flex items-center justify-center space-x-2 px-4 sm:px-6 py-3 rounded-xl transition-all duration-300 font-bold text-sm w-full sm:w-auto',
                                     isSubmitting[exercise.name]
                                       ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-400 cursor-not-allowed border border-slate-500'
                                       : hasRecord
