@@ -303,6 +303,62 @@ npm run dev -- --port 3001
 - 检查 TypeScript 类型错误
 - 检查环境变量是否正确设置
 
+### 5. 500 Internal Server Error
+
+**原因**：Nginx 没有权限访问静态文件目录
+
+**解决方案**：
+
+1. **修复文件权限**：
+   ```bash
+   # 更改 dist 目录所有者
+   sudo chown -R www-data:www-data /path/to/your/project/dist
+   
+   # 确保目录权限正确
+   sudo chmod -R 755 /path/to/your/project/dist
+   ```
+
+2. **修复父目录权限**：
+   ```bash
+   # 确保 Nginx 可以访问整个路径
+   sudo chmod 755 /home/ubuntu
+   sudo chmod 755 /home/ubuntu/soft
+   sudo chmod 755 /home/ubuntu/soft/toAi
+   ```
+
+3. **检查 Nginx 配置**：
+   ```bash
+   sudo nano /etc/nginx/sites-available/fitness-app
+   ```
+
+4. **重启 Nginx**：
+   ```bash
+   sudo systemctl restart nginx
+   ```
+
+### 6. Node.js 版本不兼容
+
+**错误信息**：`npm error code EBADENGINE`
+
+**解决方案**：
+
+1. **升级 Node.js**：
+   ```bash
+   # 安装 nvm
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+   
+   # 安装 Node.js 20.17.0+
+   nvm install 20.17.0
+   nvm use 20.17.0
+   ```
+
+2. **或修改 package.json**：
+   ```json
+   "engines": {
+     "node": ">=18.20.8"
+   }
+   ```
+
 ## 维护建议
 
 1. **定期备份数据库**：使用 Supabase 的备份功能或手动导出数据
