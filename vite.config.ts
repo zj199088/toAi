@@ -8,6 +8,13 @@ export default defineConfig({
   build: {
     sourcemap: 'hidden',
   },
+  server: {
+    port: 3000,
+    host: true,
+    watch: {
+      ignored: ['**/.pnpm-store/**', '**/node_modules/**']
+    }
+  },
   plugins: [
     react({
       babel: {

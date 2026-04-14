@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useUserStore } from './store'
 import Layout from './components/Layout'
@@ -6,18 +6,38 @@ import Home from "@/pages/Home";
 import Login from './pages/Login'
 import PlanGenerate from './pages/PlanGenerate'
 import PlanTemplates from './pages/PlanTemplates'
+import PlanCustom from './pages/PlanCustom'
 import Track from './pages/Track'
 import Diet from './pages/Diet'
+import WorkoutRecords from './pages/WorkoutRecords'
 import AdminUsers from './pages/admin/Users'
 import AdminTemplates from './pages/admin/Templates'
 import AdminStats from './pages/admin/Stats'
 
-export default function App() {
-  const { checkAuth, isAdmin, isLoading } = useUserStore()
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUserStore()
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return <>{children}</>
+}
 
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
+export default function App() {
+  const { isAdmin, isLoading, user } = useUserStore()
+
+  // 防止无限加载：如果isLoading超过10秒，强制设置为false
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        // 这里我们无法直接修改useUserStore的状态
+        // 但可以在控制台输出警告
+        console.warn('加载时间过长，可能是Supabase连接问题')
+      }, 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [isLoading])
 
   if (isLoading) {
     return (
@@ -25,6 +45,7 @@ export default function App() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">加载中...</p>
+          <p className="text-sm text-gray-400 mt-2">如果长时间无响应，请检查网络连接</p>
         </div>
       </div>
     )
@@ -40,51 +61,67 @@ export default function App() {
           </Layout>
         } />
         <Route path="/plan/generate" element={
-          <Layout>
-            <PlanGenerate />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <PlanGenerate />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/plan/templates" element={
-          <Layout>
-            <PlanTemplates />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <PlanTemplates />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/plan/custom" element={
+          <ProtectedRoute>
+            <Layout>
+              <PlanCustom />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/track" element={
-          <Layout>
-            <Track />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Track />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/diet" element={
-          <Layout>
-            <Diet />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Diet />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/records" element={
+          <ProtectedRoute>
+            <Layout>
+              <WorkoutRecords />
+            </Layout>
+          </ProtectedRoute>
         } />
         <Route path="/admin/users" element={
-          isAdmin ? (
+          <ProtectedRoute>
             <Layout>
               <AdminUsers />
             </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          </ProtectedRoute>
         } />
         <Route path="/admin/templates" element={
-          isAdmin ? (
+          <ProtectedRoute>
             <Layout>
               <AdminTemplates />
             </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          </ProtectedRoute>
         } />
         <Route path="/admin/stats" element={
-          isAdmin ? (
+          <ProtectedRoute>
             <Layout>
               <AdminStats />
             </Layout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          </ProtectedRoute>
         } />
       </Routes>
     </Router>
