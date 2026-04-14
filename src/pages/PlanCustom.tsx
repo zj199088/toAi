@@ -15,7 +15,7 @@ const PlanCustom: React.FC = () => {
     goal: '减脂',
     duration: 4,
     exercises: [
-      { name: '', sets: 3, reps: 10, type: 'reps' }
+      { name: '', sets: 3, reps: 10, type: 'reps', duration: undefined }
     ]
   })
 
@@ -221,7 +221,7 @@ const PlanCustom: React.FC = () => {
                 onClick={() => {
                   setCustomPlan(prev => ({
                     ...prev,
-                    exercises: [...prev.exercises, { name: '', sets: 3, reps: 10, type: 'reps' }]
+                    exercises: [...prev.exercises, { name: '', sets: 3, reps: 10, type: 'reps', duration: undefined }]
                   }))
                 }}
                 className="w-full py-2 px-4 rounded-xl bg-slate-800/50 border border-dashed border-cyan-500/30 text-cyan-400 hover:bg-slate-700/50 hover:border-cyan-400/40 transition-all duration-300 flex items-center justify-center"
