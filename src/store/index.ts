@@ -110,6 +110,15 @@ export const useUserStore = create<UserState>((set) => ({
       // 从localStorage移除用户信息
       localStorage.removeItem('user')
       localStorage.removeItem('isAdmin')
+      // 重置所有store
+      useFitnessPlanStore.getState().plans = []
+      useFitnessPlanStore.getState().currentPlan = null
+      useWorkoutRecordStore.getState().records = []
+      useWorkoutRecordStore.getState().totalCountLastYear = 0
+      useBodyMeasurementStore.getState().measurements = []
+      useDietPlanStore.getState().plans = []
+      useDietPlanStore.getState().currentPlan = null
+      useDietRecordStore.getState().records = []
       set({ user: null, isAdmin: false, isLoading: false })
     } catch (error) {
       console.error('登出失败:', error)
